@@ -1,0 +1,6 @@
+SimMips_Machine_Setting
+
+@mmc 1m
+@map 0x0 0x80000 MAIN_MEMORY
+@map 0x800100 0x100 MIERU_IO
+@map 0x800200 0x200 MMC_IO

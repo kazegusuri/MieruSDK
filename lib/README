@@ -1,0 +1,44 @@
+
+About MieruLib
+*License
+MieruLib is freely available under a BSD license.
+
+
+MieruLibについて
+
+*ライセンス
+MieruLibはBSDライセンスの元，自由に改変・配布できます．
+
+*構成要素
+MieruLibはMieruPCの動作に必要なドライバとCライブラリのサブセットからなります．
+ドライバを利用することでキー入力や文字描画などがOSを使用することなく，
+アプリケーション単独で可能になります．
+Cライブラリは可読性を重視した実装となっており，関数の動作を1つずつ追いやすくなっています．
+
+*使い方
+通常はMieruSDKから利用して下さい．
+
+*ドキュメント
+MieruLibはDoxygenを利用してコメント付けをしています．
+MieruSDKのdoc/mierulib_htmlにHTML形式で出力したドキュメントがあります．
+
+*ファイル構成
+MieruLib             :
+  |  
+  |- startup.S       : 
+  |- itcfunc.c       : 
+  |- itcfunc.h       : 
+  |- mierulib.c      : 
+  |- mierulib.h      : 
+  |- syscall.c       :
+  |- syscall.h       :
+  |- xmalloc.c       :
+  |- xmalloc.h       :
+  |- bmp.c           :
+  |- bmp.h           :
+  |- types.h         :
+  |- keysym.h        :
+  |- keytable.h      :
+  |- keycode.h       :
+  |- mmap.h          :
+  |- rename.h        :

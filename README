@@ -1,0 +1,17 @@
+See doc/mierusdk.txt for the explanation to develop your own applications 
+for MieruPC.
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+LICENCE information
+
+MieruSDK consists of SimMips, LCD Simulator, MieruOS, MieruLib, sample
+applications, and some utilities.
+The simulators (SimMips and LCD Simulator, which are located on 'sim'
+subdirectory) are dual licensed under the New BSD or GNU GPL Version 2
+licenses. MieruOS, MieruLib, and the utilities (which are located on
+'os', 'lib', and 'etc' subdirectories, respectively) are licensed under
+the New BSD license. Sample applications have various licenses.
+
+See COPYING files on the subdirectories for more information.
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-

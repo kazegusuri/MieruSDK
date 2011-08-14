@@ -1,0 +1,83 @@
+
+About MieruOS
+*License
+MieruOS is freely available under a BSD license.
+
+*How to run
+MieruOS can be executed by a same way to run applications for MieruPC from Multi Media Card.
+All you have to do is just copy 'mieruos.bin' create by 'make' command to MMC.
+You need to copy the OS image first, because MieruPC run an image which was written to MMC first.
+
+*How to use
+A shell program will be available after the operating system is executed.
+The shell can get your input and run other programs.
+Please copy an Elf binary after compiling a program to MMC to add new programs.
+Then you can run the program with its path.
+Arguments are also available.
+There are some built-in commands(ls,cd.pwd,cls,sh,help) you can use.
+
+
+MieruOSについて
+
+*ライセンス
+MieruOSはBSDライセンスの元，自由に改変・配布できます．
+
+*起動方法
+OSはMieruPC上で動くプログラムと同様の方法でMMCカードから起動することができます．
+makeした時に生成されるmieruos.binをMMCカードにコピーするだけです．
+MieruPCでは初期化したMMCに最初にコピーされたイメージが起動されるので，OSのイメージを最初にコピーする必要があります．
+
+*使い方
+OSを起動するとシェルが立ち上がります．
+シェルではユーザの入力を受け付け，コマンドやプログラムを実行することが可能です．
+MMCカードにプログラムを追加するには，コンパイルしてできたELFバイナリをコピーします．
+追加したプログラムのパスを指定することで実行することが可能です．
+組み込みコマンドとしてls,cd,pwd,cls,sh,help,が使用可能です．
+プログラム実行時に引数を指定して実行することも可能です．
+
+*機能
+OSはメモリ領域の先頭から0x20000(128KB)までを使用します．
+実行されたプログラム(アプリケーション)はメモリ領域の0x20000から0x80000を利用します．
+MieruOSでは同時に1つのアプリケーションしか起動することができません．
+ファイルシステムを備えており，MMCカードの中のファイルを閲覧・操作が可能です．
+メモリ領域を管理し，アプリケーションにヒープ領域を提供しています．
+また，OSの機能を提供するためのインタフェース(システムコール)を提供しています．
+
+*システムコール
+アプリケーションはOSの機能を利用するために様々なシステムコールが使用可能です．
+使用可能なシステムコールについてはアプリケーションライブラリのsyscall.hを参照して下さい．
+システムコールを呼び出すと，割り込みによって制御がOSに移ります．
+OSはシステムコール呼び出し時に指定されたシステムコール番号と対応する関数を呼び出します．
+
+*ファイル構成
+MieruOS              : SDKルート
+  |  
+  |- Makefile        : 
+  |- COPYING         : 
+  |- README          : 
+  |
+  |- src             : 
+  |  |- Makefile     : 
+  |  |- boot.S       : スタートアップ処理
+  |  |- cmain.cpp    : main関数のあるファイル
+  |  |- elf.cpp      : エルフローダ
+  |  |- exc.S        : 例外処理ハンドラ
+  |  |- fat.cpp      : FATの操作関数
+  |  |- fatfile.cpp  : FATのファイル操作関数
+  |  |- kernel.cpp   : カーネルの初期処理
+  |  |- new.cpp      : newの定義(未実装)
+  |  |- point.cpp    : 座標管理(Shell用)
+  |  |- shell.cpp    : シェルの実装
+  |  |- syscall.cpp  : システムコール
+  |  |- task.cpp     : タスク管理
+  |
+  |- include         : 
+  |   |- elf.h       : 
+  |   |- fat.h       : 
+  |   |- file.h      : 
+  |   |- kernel.h    : 
+  |   |- new.h       : 
+  |   |- point.h     : 
+  |   |- shell.h     : 
+  |   |- syscall.h   : 
+  |   |- task.h      : 

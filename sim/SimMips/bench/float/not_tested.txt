@@ -1,0 +1,10 @@
+movf
+movt
+mfc1
+cfc1
+mtc1
+ctc1
+movf.s
+movf.d
+movt.s
+movt.d

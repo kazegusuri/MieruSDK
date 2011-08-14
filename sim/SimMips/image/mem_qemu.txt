@@ -1,0 +1,14 @@
+SimMips_Machine_Setting
+
+@map 0x00000000 0x08000000 MAIN_MEMORY
+@map 0x14000000 0x00001000 ISA_IO
+@map 0x100b8000 0x00000004 ISA_BUS
+
+# QEMU disk image for MIPS little endian (mipsel) is needed,
+# which is downloadable from <http://wiki.qemu.org/Download>.
+# Extract the downloaded file to the same directory as this file.
+
+@mem 00800000 initrd.gz
+@mem 00fffef0 arg-qemu.bin
+
+@reg $sp=0xa0007f00

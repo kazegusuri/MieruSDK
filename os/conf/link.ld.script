@@ -1,0 +1,22 @@
+
+ENTRY(_start)
+
+SECTIONS
+{
+	.startup 0x000 : {./src/boot.o(.text)}
+    excecption 0x280 : {
+   	   ./src/exc.o(.text)
+    }
+    .text : {		
+  		*(.text .text.*)
+		KEEP (*(.text))
+
+    }=0
+    
+    .rodata : { * (.rodata)}
+    .data : { *(.data) }
+    .got : { *(.got) }
+    .bss : { *(.bss) }
+
+}
+
