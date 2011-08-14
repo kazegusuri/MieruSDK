@@ -4,7 +4,7 @@ SIMMIPS =  ./sim/SimMips
 LCD     =  ./sim/lcd
 OS      =  ./os
 FATOP   =  ./etc/fatop
-CMD     =  ./app/sample/command
+CMD     =  ./app/command
 
 all:
 	make -C $(MEMGEN)
