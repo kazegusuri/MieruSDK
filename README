@@ -1,8 +1,5 @@
-See doc/mierusdk.txt for the explanation to develop your own applications 
-for MieruPC.
-
--+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-LICENCE information
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+* LICENCE information
 
 MieruSDK consists of SimMips, LCD Simulator, MieruOS, MieruLib, sample
 applications, and some utilities.
@@ -14,4 +11,35 @@ the New BSD license. Sample applications have various licenses.
 
 See COPYING files on the subdirectories for more information.
 
--+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+* Abount MieruSDK
+
+MieruSDK is a development kit that includes a simple operating system and 
+simulators and some tools for MieruPC. 
+
+** MieruPC
+This is a small FPGA-based computer system.
+For more information, please access the web site.
+http://www.mierupc.com/
+
+** MieruOS
+This is a simple operating system running on MieruPC written in C++. 
+
+** SimMips
+This is a MIPS system simulator written in C++ and is originally developed in
+Tokyo Institute of Technology. For more information, please access the web site.
+http://www.arch.cs.titech.ac.jp/SimMips/
+I have modified the SimMips to emulate MieruPC by implementing specific 
+functions for it.
+
+** LCD Simulator
+This is a simulator for MieruLCD written in GDK and C. It's possible to emulate
+full environment of MieruPC to use both LCD Simulator and modified SimMips.
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+* Development with MieruSDK for MieruPC
+
+See doc/mierusdk.txt for the explanation to develop your own applications 
+for MieruPC.
+
+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
