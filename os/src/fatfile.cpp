@@ -481,7 +481,7 @@ int FatFile::create(int mode, int isdir){
 
 /******************************************************************************/
 int FatFile::close(){
-    _syscall(5000, 0,0,0,0);
+    system::_syscall(5000, 0,0,0,0);
     return 0;
 }
 

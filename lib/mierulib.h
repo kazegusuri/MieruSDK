@@ -335,7 +335,13 @@ int mpc_isupper(char c);
  *@param n 書き込むバイト数
  *@return 変換後の文字c
  */ 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void *mpc_memset(void *s, int c, unsigned int n);
+#ifdef __cplusplus
+}
+#endif
 
 /*! 
  *@brief メモリ領域を比較する．

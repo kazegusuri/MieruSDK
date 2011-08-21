@@ -57,11 +57,17 @@
  *@param arg4 システムコールの第4引数
  *@return 呼び出したシステムコールの返り値
  */ 
+#ifdef MIERU_OS
+namespace system{
+#endif
 int _syscall(unsigned int syscall_nr,
              unsigned int arg1,
              unsigned int arg2,
              unsigned int arg3,
              unsigned int arg4);
+#ifdef MIERU_OS
+}
+#endif
 
 #ifdef MIERUPC_APPLICATION
 #define SYSCALL_NULL      0  ///< sys_nullのシステムコール番号

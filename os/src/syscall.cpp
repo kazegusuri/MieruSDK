@@ -126,41 +126,6 @@ void init_syscall(void){
 }
 
 /******************************************************************************/
-int __attribute__((noinline)) _syscall(
-    uint syscall_nr,
-    uint arg1,
-    uint arg2,
-    uint arg3,
-    uint arg4){
-	register uint v0 asm("$2") = (uint) syscall_nr;
-	register uint a0 asm("$4") = (uint) arg1;
-	register uint a1 asm("$5") = (uint) arg2;
-	register uint a2 asm("$6") = (uint) arg3;
-	register uint a3 asm("$7") = (uint) arg4;
-
-    /* __asm__ volatile ( */
-    /*     "syscall   \n" */
-    /*     "move %0, $v0 \n" */
-    /*     : "=&r" (v0) */
-    /*     : "r" (v0) , "r" (a0), "r" (a1), "r" (a2), "r" (a3) */
-    /*     ); */
-    __asm__ volatile (
-        "li $k0, 0x100 \n"
-        "addiu $sp, $sp, -20 \n" // $a0-$a3 + $sp
-        "sw $ra, 16($sp) \n"
-        "jalr $k0 \n"
-        "nop \n"
-        "lw $ra, 16($sp) \n"
-        "addiu $sp, $sp, 20 \n"
-        "move %0, $v0 \n"
-        : "=&r" (v0)
-        : "r" (v0) , "r" (a0), "r" (a1), "r" (a2), "r" (a3)
-        );
-
-	return v0;
-}
-
-/******************************************************************************/
 int sys_null(){
     lcd_dprintf("OS message: sys_null was called\n");
     return 0;
@@ -292,19 +257,6 @@ int sys_open(const char *pathname, int flags){
 /******************************************************************************/
 int sys_creat(const char *pathname, int mode){
     return sys_open(pathname, O_WRONLY | O_CREAT | O_TRUNK);
-    // int ret;
-    // File *f;
-    // f = preopen(pathname);
-    // if(f == NULL)
-    //     return -FAT_ERROR_INVALID_FILE_NAME;
-
-    // ret  = f->create(mode, 0);
-    // if(ret < 0){
-    //     delete f;
-    //     return ret;
-    // }
-    // f->user = kernel.taskmanager.getCurrentTask()->pid;
-    // return f->num;
 }
 
 /******************************************************************************/

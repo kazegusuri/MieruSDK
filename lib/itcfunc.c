@@ -37,7 +37,13 @@
  *MieruLCD用のコマンドライブラリ
  */
 
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wcast-qual"
 #include <mierulib.h>
+
+#ifdef MIERU_OS
+using namespace system;
+#endif
 
 static display_t display;
 static char buf[BUF_SIZE];

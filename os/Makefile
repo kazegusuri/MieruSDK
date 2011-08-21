@@ -8,17 +8,18 @@ INCDIR  = $(OSDIR)/include
 LIBDIR  = $(SDKROOT)/lib
 
 MEMTXT   = conf/mem.txt
-MACROOPT = -DMIERUPC_STANDALONE -DMPC_MLIB_RENAME
+MACROOPT = -DMIERUPC_STANDALONE -DMPC_MLIB_RENAME -DMIERU_OS
 SCRIPT   = conf/os.ld.script
 MAKETYPE = std
 
 COMPILE = $(MIPSCXX)
-WARNINGOPT = -Wall -Wextra -Wformat=2 -Wcast-qual -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith -Winit-self -Weffc++ -Wredundant-decls
+#WARNINGOPT = -Wall -Wextra -Wformat=2 -Wcast-qual -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith -Winit-self -Weffc++ -Wredundant-decls
+WARNINGOPT = -Wall -Wextra -Wformat=2 -Wcast-qual -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith -Winit-self -Wredundant-decls
 CFLAGS  ?= $(WARNINGOPT) -ffreestanding -msoft-float -Os -nostdlib -nostdinc -fno-builtin -fno-exceptions -fno-rtti -fno-strict-aliasing  -nostartfiles -nodefaultlibs -fno-stack-protector -fcheck-new -I$(INCDIR) -I$(LIBDIR) $(MACROOPT)
 
 
 OBJS = $(SRCDIR)/cmain.o $(SRCDIR)/kernel.o $(SRCDIR)/boot.o $(SRCDIR)/task.o \
-	$(LIBDIR)/mierulib.o $(LIBDIR)/itcfunc.o $(SRCDIR)/new.o \
+	$(LIBDIR)/mierulib.o $(LIBDIR)/itcfunc.o $(LIBDIR)/syscall.o $(SRCDIR)/new.o \
 	$(SRCDIR)/exc.o $(SRCDIR)/syscall.o \
 	$(SRCDIR)/fatfile.o $(SRCDIR)/fat.o $(SRCDIR)/elf.o \
 	$(SRCDIR)/shell.o $(SRCDIR)/point.o $(SRCDIR)/cache.o

@@ -86,9 +86,3 @@ int sys_lseek(int fd, int offset, int whence);
 int sys_getcwd(char *buf, unsigned int size);
 
 int sys_null();
-int _syscall(uint syscall_nr,
-             uint arg1,
-             uint arg2,
-             uint arg3,
-             uint arg4);
- 
