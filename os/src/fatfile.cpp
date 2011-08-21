@@ -200,7 +200,7 @@ void FatFile::set(int cl){
         return set( kernel.root->entry, 1, 0, 0, 0);
 
     // create this dir's cluster
-    this->cluster.set(cl);
+    this->cluster.set(this->isdir, cl);
 
     // search ".." entry in this directory
     fatname.set("..");
@@ -213,7 +213,7 @@ void FatFile::set(int cl){
 
     // create parent cluster
     parentcl = ent.cluster;
-    parent.set(parentcl);
+    parent.set(true, parentcl);
 
     // search own entry in parent cluster
     sec = off = 0;
@@ -243,7 +243,7 @@ void FatFile::set(FatEntry ent, int exi, int par, int sec, int nth){
 
     // root directory
     if(exist)
-        this->cluster.set(this->entry.cluster);
+        this->cluster.set(this->isdir, this->entry.cluster);
     else
         this->cluster.clear();
 }
@@ -362,9 +362,10 @@ File *FatFile::lookup(const char *name){
 int FatFile::open(int mode){
     int ret;
     if(!this->exist){
-        if(!(mode & O_CREAT))
+        if(!(mode & O_CREAT)){
             return -FAT_ERROR_NO_SUCH_FILE;
-        
+        }
+
         ret = this->create(0, 0);
         if(ret < 0)
             return ret;
@@ -405,7 +406,7 @@ int FatFile::create(int mode, int isdir){
         return -FAT_ERROR_FILE_ALREADY_EXIST;
 
     // create parent cluster list
-    cl.set(parent);
+    cl.set(true, parent);
 
     // search empty entry in parent dir
     sec = off = 0;
@@ -441,10 +442,10 @@ int FatFile::create(int mode, int isdir){
     this->entry.ctime = this->entry.utime = 0;                    //   00:00:00
     this->entry.cdate = this->entry.udate = this->entry.adate = 0x3a21; // 2009/01/01
     this->entry.attr = FAT_FILE_ATTR_ARC | ((isdir) ? FAT_FILE_ATTR_DIR : 0);
-    this->entry.cluster = this->entry.cluster2 = 0;
+    this->entry.cluster = this->entry.cluster2 = Fat::UNDEFINED_CLUSTER;
+    this->isdir = isdir;
 
     if(isdir){
-        this->isdir = 1;
         ret = this->cluster.add(1);
         if(ret != 1)
             return FAT_ERROR_DISC_IS_FULL;

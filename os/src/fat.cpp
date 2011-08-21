@@ -84,22 +84,22 @@ int Fat::init(void){
     clusterbegin = rootbegin + rootsize;
     snum = (bpb.sectornum2 == 0) ?  bpb.sectornum : bpb.sectornum2;
     clusternum = (snum - clusterbegin + sec) / clustersize + 2;
-    last = (type == FAT12) ? 0xff8 : 0xfff8;
+    last = (type == FAT12) ? Fat::LAST_CLUSTER_FAT12 : Fat::LAST_CLUSTER_FAT16;
 
     // create static root entry
     FatEntry root;
     root.name[0] = 0;
     root.ext[0] = 0;
-    root.attr = 0x1f; // special use
-    root.cluster = 0;
-    root.cluster2 = 0;
+    root.attr = 0x0f | FAT_FILE_ATTR_DIR; // special use
+    root.cluster = Fat::ROOT_CLUSTER;
+    root.cluster2 = Fat::ROOT_CLUSTER;
     root.size = 0;
     
     // create root file
-    kernel.root = new FatFile(root, 1, 0, 0, 0);
+    kernel.root = new FatFile(root, 1, Fat::ROOT_CLUSTER, 0, 0);
 
     // create current dir file
-    kernel.current = new FatFile(root, 1, 0, 0, 0);
+    kernel.current = new FatFile(root, 1, Fat::ROOT_CLUSTER, 0, 0);
     
     return 0;
 }
@@ -339,13 +339,18 @@ int FatCluster::getSector(){
 }
 
 /******************************************************************************/
-void FatCluster::set(int n){
+void FatCluster::set(bool isdir, int n){
     cl = n;
 
-    if(n == 0){
-        isroot = 1;
-        sectors = kernel.fat.rootsize;
-    }else{
+    if (n == 0) {
+        if (isdir) { // root directory
+            isroot = 1;
+            sectors = kernel.fat.rootsize;
+        } else { // new file which has no clusters
+            isroot = 0;
+            sectors = 0;
+        }
+    }else{ // regular file or directory
         isroot = 0;
         sectors = 0;
         while(n > 0){

@@ -132,7 +132,7 @@ public:
     int getTop();
     int getSize();
     int getSector();
-    void set(int n);
+    void set(bool isdir, int n);
     uchar *next();
     uchar *seek(int nth);
     int add(int n);
@@ -147,6 +147,11 @@ public:
     enum{
         SECTOR_SIZE = 512,
         ENTRY_SIZE  = 32,
+        LAST_CLUSTER_FAT12 = 0xff8,
+        LAST_CLUSTER_FAT16 = 0xfff8,
+
+        UNDEFINED_CLUSTER = 0,
+        ROOT_CLUSTER = 0,
     };
 
     typedef enum {
