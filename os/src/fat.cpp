@@ -96,10 +96,10 @@ int Fat::init(void){
     root.size = 0;
     
     // create root file
-    kernel.root = new FatFile(root, 1, Fat::ROOT_CLUSTER, 0, 0);
+    Kernel::getInstance()->root = new FatFile(root, 1, Fat::ROOT_CLUSTER, 0, 0);
 
     // create current dir file
-    kernel.current = new FatFile(root, 1, Fat::ROOT_CLUSTER, 0, 0);
+    Kernel::getInstance()->current = new FatFile(root, 1, Fat::ROOT_CLUSTER, 0, 0);
     
     return 0;
 }
@@ -331,10 +331,10 @@ int FatCluster::getSize(){
 /******************************************************************************/
 int FatCluster::getSector(){
     if(isroot){
-        return kernel.fat.rootbegin + cur_pos;
+        return Kernel::getInstance()->fat.rootbegin + cur_pos;
     }else{
-        return kernel.fat.clusterbegin + (cur_cl - 2) * kernel.fat.clustersize 
-            +  (cur_pos % kernel.fat.clustersize);
+        return Kernel::getInstance()->fat.clusterbegin + (cur_cl - 2) * Kernel::getInstance()->fat.clustersize 
+            +  (cur_pos % Kernel::getInstance()->fat.clustersize);
     }
 }
 
@@ -345,7 +345,7 @@ void FatCluster::set(bool isdir, int n){
     if (n == 0) {
         if (isdir) { // root directory
             isroot = 1;
-            sectors = kernel.fat.rootsize;
+            sectors = Kernel::getInstance()->fat.rootsize;
         } else { // new file which has no clusters
             isroot = 0;
             sectors = 0;
@@ -354,8 +354,8 @@ void FatCluster::set(bool isdir, int n){
         isroot = 0;
         sectors = 0;
         while(n > 0){
-            n = kernel.fat.referTable(n);
-            sectors += kernel.fat.clustersize;
+            n = Kernel::getInstance()->fat.referTable(n);
+            sectors += Kernel::getInstance()->fat.clustersize;
         }
     }
 }
@@ -369,23 +369,23 @@ uchar *FatCluster::next(){
 
     // root entry
     if(isroot){
-        sec = kernel.fat.rootbegin + cur_pos;
-        kernel.fat.readSector(sec);
+        sec = Kernel::getInstance()->fat.rootbegin + cur_pos;
+        Kernel::getInstance()->fat.readSector(sec);
         return buffer;
     }
 
-    size = kernel.fat.clustersize;
+    size = Kernel::getInstance()->fat.clustersize;
     n = cur_pos / size;
     off = cur_pos % size;
 
     // get next cluster if needed
     if( (cur_pos % size) == 0 ){
-        cur_cl = kernel.fat.referTable(cur_cl);
+        cur_cl = Kernel::getInstance()->fat.referTable(cur_cl);
         if(cur_cl < 0) return NULL;
     }
     
-    sec = kernel.fat.clusterbegin + (cur_cl - 2) * size + off;
-    kernel.fat.readSector(sec);
+    sec = Kernel::getInstance()->fat.clusterbegin + (cur_cl - 2) * size + off;
+    Kernel::getInstance()->fat.readSector(sec);
     return buffer;
 }
 
@@ -399,27 +399,27 @@ uchar *FatCluster::seek(int nth){
     if(isroot){
         cur_pos = nth;
         cur_cl = cl;
-        sec = kernel.fat.rootbegin + nth;
-        kernel.fat.readSector(sec);
+        sec = Kernel::getInstance()->fat.rootbegin + nth;
+        Kernel::getInstance()->fat.readSector(sec);
         return buffer;
     }
 
     cur = cl;
-    size = kernel.fat.clustersize;
+    size = Kernel::getInstance()->fat.clustersize;
     n = nth / size;
     off = nth % size;
 
     // get the target clusster
     for(i = 0; i < n; i++){
-        cur = kernel.fat.referTable(cur);
+        cur = Kernel::getInstance()->fat.referTable(cur);
         if(cur < 0) return NULL;
     }
 
     cur_pos = nth;
     cur_cl = cur;
 
-    sec = kernel.fat.clusterbegin + (cur - 2) * size + off;
-    kernel.fat.readSector(sec);
+    sec = Kernel::getInstance()->fat.clusterbegin + (cur - 2) * size + off;
+    Kernel::getInstance()->fat.readSector(sec);
     return buffer;
 }
 
@@ -433,7 +433,7 @@ int FatCluster::add(int n){
 
     // in case that there is no cluster in the list
     if(sectors == 0){
-        cl = kernel.fat.allocNewCluster(0);
+        cl = Kernel::getInstance()->fat.allocNewCluster(0);
         if(cl < 0) goto out;
 
         remain--;
@@ -442,18 +442,18 @@ int FatCluster::add(int n){
     // track the list
     tmp = cl;
     for(;;){
-        next = kernel.fat.referTable(tmp);
+        next = Kernel::getInstance()->fat.referTable(tmp);
         if(next < 0) break;
         tmp = next;
     }
 
     // add new cluster to the list
     for(; remain > 0; remain--){
-        tmp = kernel.fat.allocNewCluster(tmp);
+        tmp = Kernel::getInstance()->fat.allocNewCluster(tmp);
         if(tmp < 0) goto out;
     }
 out:
-    sectors += (n - remain) * kernel.fat.clustersize;
+    sectors += (n - remain) * Kernel::getInstance()->fat.clustersize;
     return n - remain;
 }
 
@@ -466,8 +466,8 @@ void FatCluster::remove(){
 
     // get the target clusster
     while(cur >= 0){
-        next = kernel.fat.referTable(cur);
-        kernel.fat.deleteCluster(cur);
+        next = Kernel::getInstance()->fat.referTable(cur);
+        Kernel::getInstance()->fat.deleteCluster(cur);
         cur = next;
     }
 

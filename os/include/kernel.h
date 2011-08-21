@@ -40,13 +40,18 @@
 #include <syscall.h>
 #include <task.h>
 #include <fat.h>
-
+#include <new.h>
 
 void startKernel(void);
 
 class Kernel{
+    Kernel();
+    Kernel(const Kernel &);
+    Kernel &operator =(const Kernel &);
+
     
 public:
+
     TaskManager taskmanager;
     Fat fat;
 
@@ -59,7 +64,6 @@ public:
     void message();
     void start();
 
-    Kernel();
+    static Kernel *_instance;
+    static Kernel *getInstance();
 };
-
-Kernel kernel;

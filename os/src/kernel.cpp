@@ -40,6 +40,8 @@
 #include <cache.h>
 
 extern void sh_mainloop();
+char kernel_buffer[sizeof(Kernel)];
+Kernel *Kernel::_instance = NULL;
 
 /******************************************************************************/
 extern "C" void __cxa_pure_virtual(){
@@ -59,13 +61,22 @@ int  _purecall(){
 
 /******************************************************************************/
 void startKernel(void){
-    kernel.init();
-    kernel.start();
+    Kernel *kernel = Kernel::getInstance();
+    kernel->init();
+    kernel->start();
 }
 
 /******************************************************************************/
 Kernel::Kernel(){
     // lcd_dprintf("hoge----------------------\n");
+}
+
+/******************************************************************************/
+Kernel *Kernel::getInstance() {
+    if (_instance == NULL) {
+        _instance = new(kernel_buffer) Kernel();
+    }
+    return _instance;
 }
 
 /******************************************************************************/

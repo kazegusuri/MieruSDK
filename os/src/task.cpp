@@ -103,9 +103,10 @@ void TaskManager::switchContext(Task *prev, Task *cur){
 }
 
 /******************************************************************************/
-Task::Task(){
-    state = TASK_STATE_NOALLOC;
-    pid = -1;
+Task::Task() :
+    state(TASK_STATE_NOALLOC),
+    pid(-1)
+{
 }
 
 /******************************************************************************/

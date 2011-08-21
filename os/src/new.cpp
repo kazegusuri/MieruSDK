@@ -31,6 +31,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
+#include <types.h>
 #include <new.h>
 
 /******************************************************************************/
@@ -61,4 +63,10 @@
 //     return;
 // }
 
+/******************************************************************************/
+void* operator new(size_t size, void *address)
+{
+    return address;
+}
+ 
 /******************************************************************************/

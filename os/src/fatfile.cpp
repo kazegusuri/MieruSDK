@@ -157,7 +157,7 @@ void *FatFile::operator new(uint size){
     int i;
     FatFile *file;
     for(i = 0; i < MAX_FILE; i++){
-        file = &kernel.files[i];
+        file = &Kernel::getInstance()->files[i];
         if(!file->use)
             break;
     }
@@ -178,8 +178,8 @@ void FatFile::operator delete(void *address){
 
 /******************************************************************************/
 int FatFile::updateEntry(){
-    kernel.fat.readSector(this->entry_sec);
-    kernel.fat.writeEntry(&this->entry, this->entry_off);
+    Kernel::getInstance()->fat.readSector(this->entry_sec);
+    Kernel::getInstance()->fat.writeEntry(&this->entry, this->entry_off);
     return 0;
 }
 
@@ -197,7 +197,7 @@ void FatFile::set(int cl){
 
     // copy the entry if root directory
     if(cl == 0)
-        return set( kernel.root->entry, 1, 0, 0, 0);
+        return set( Kernel::getInstance()->root->entry, 1, 0, 0, 0);
 
     // create this dir's cluster
     this->cluster.set(this->isdir, cl);
@@ -209,7 +209,7 @@ void FatFile::set(int cl){
    
     // this dir must be root directory if not found
     if(ret < 0)
-        return set( kernel.root->entry, 1, 0, 0, 0); // impossible to come here
+        return set( Kernel::getInstance()->root->entry, 1, 0, 0, 0); // impossible to come here
 
     // create parent cluster
     parentcl = ent.cluster;
@@ -228,7 +228,7 @@ void FatFile::set(int cl){
     this->entry_sec = sec;
     this->entry_off = off;
     this->parent = parentcl;
-    printEntry();
+    //printEntry();
 }
 
 /******************************************************************************/
@@ -253,7 +253,7 @@ int FatFile::searchEntry(FatFileName fatname, FatEntry *entry){
     int i;
 
     for(i = 0; i < Fat::SECTOR_SIZE / Fat::ENTRY_SIZE; i++) {
-        kernel.fat.readEntry(entry, i);
+        Kernel::getInstance()->fat.readEntry(entry, i);
         if(entry->name[0] == 0x00 || entry->name[0] == 0x05 ||
            entry->name[0] == (char) 0xe5 ||
            entry->attr & FAT_FILE_ATTR_VOLUME)
@@ -274,7 +274,7 @@ int FatFile::searchEntry(int cl, FatEntry *entry){
     int i;
 
     for(i = 0; i < Fat::SECTOR_SIZE / Fat::ENTRY_SIZE; i++) {
-        kernel.fat.readEntry(entry, i);
+        Kernel::getInstance()->fat.readEntry(entry, i);
         if(entry->name[0] == 0x00 || entry->name[0] == 0x05 ||
            entry->name[0] == (char) 0xe5 ||
            entry->attr & FAT_FILE_ATTR_VOLUME)
@@ -293,7 +293,7 @@ int FatFile::searchEntry(){
     FatEntry entry;
 
     for(i = 0; i < Fat::SECTOR_SIZE / Fat::ENTRY_SIZE; i++) {
-        kernel.fat.readEntry(&entry, i);
+        Kernel::getInstance()->fat.readEntry(&entry, i);
         if (entry.name[0] == 0x00 || 
             entry.name[0] == (char) 0x05 || 
             entry.name[0] == (char) 0xe5)
@@ -465,13 +465,13 @@ int FatFile::create(int mode, int isdir){
         // "." entry is always assigned here
         ent.name[0] = '.'; // "."
         this->cluster.seek(0);
-        kernel.fat.writeEntry(&ent, 0);
+        Kernel::getInstance()->fat.writeEntry(&ent, 0);
         
 
         // ".." entry is always assigned here
         ent.cluster = static_cast<ushort>(this->parent);
         ent.name[1] = '.'; // ".."
-        kernel.fat.writeEntry(&ent, 1);
+        Kernel::getInstance()->fat.writeEntry(&ent, 1);
     }else{
         updateEntry();
     }
@@ -563,7 +563,7 @@ int FatFile::readDir(void *buf, uint count){
 
     for(buffer = cluster.seek(from_sec); buffer != NULL; buffer = cluster.next()){
         for(i = offset / Fat::ENTRY_SIZE; i < Fat::SECTOR_SIZE / Fat::ENTRY_SIZE; i++) {
-            kernel.fat.readEntry(&ent, i);
+            Kernel::getInstance()->fat.readEntry(&ent, i);
             if (ent.name[0] == 0x00 || ent.name[0] == (char) 0x05 ||
                 ent.name[0] == (char) 0xe5 || 
                 ent.attr & FAT_FILE_ATTR_VOLUME)
@@ -690,7 +690,7 @@ int FatFile::writeFile(const void *buf, uint count){
     // allocate new cluster if there is not enough
     if(to_sec >= (uint)cluster.getSize()){
         int tmp, prev, ret;
-        tmp = (to_sec - cluster.getSize()) / kernel.fat.clustersize + 1;
+        tmp = (to_sec - cluster.getSize()) / Kernel::getInstance()->fat.clustersize + 1;
         prev = cluster.getTop();
         ret = cluster.add(tmp);
         if(ret != tmp)
@@ -757,7 +757,7 @@ int FatFile::remove(){
         // check if this dir is empty
         for(p = cluster.seek(0); p != NULL; p = cluster.next()){
             for(int i = 0; i < Fat::SECTOR_SIZE / Fat::ENTRY_SIZE; i++) {
-                kernel.fat.readEntry(&ent, i);
+                Kernel::getInstance()->fat.readEntry(&ent, i);
                 if(ent.name[0] == '.'){
                     isEmpty = false;
                     break;

@@ -57,10 +57,10 @@ File *preopen(const char *name){
     path[127] = 0;
 
     if(path[0] == '/'){
-        f1 = (File *)kernel.root;
+        f1 = (File *)Kernel::getInstance()->root;
         p = path+1;
     }else{
-        f1 = (FatFile *)kernel.current;
+        f1 = (FatFile *)Kernel::getInstance()->current;
         p = path;
     }
 
@@ -139,26 +139,26 @@ int sys_init(struct task_report *repo){
 
 /******************************************************************************/
 int sys_fin(const struct task_report *repo){
-    kernel.taskmanager.current->report = *repo;
+    Kernel::getInstance()->taskmanager.current->report = *repo;
     lcd_setdisplay(repo->disp);
     return 0;
 }
 
 /******************************************************************************/
 int sys_exit(int status){
-    Task *prev_task = kernel.taskmanager.getCurrentTask();
-    Task *current = kernel.taskmanager.getKernelTask();
+    Task *prev_task = Kernel::getInstance()->taskmanager.getCurrentTask();
+    Task *current = Kernel::getInstance()->taskmanager.getKernelTask();
 
     for(int i = 0; i < MAX_FILE; i++){
-        if(kernel.files[i].user == (uint)prev_task->pid && 
-           kernel.files[i].use  == 1                    ){
+        if(Kernel::getInstance()->files[i].user == (uint)prev_task->pid && 
+           Kernel::getInstance()->files[i].use  == 1                    ){
             lcd_dprintf("OS message: User Process has't closed file. (%d)\n", i);
-            delete &kernel.files[i];
+            delete &Kernel::getInstance()->files[i];
         }
     }
 
-    kernel.taskmanager.freeTask(prev_task->pid);
-    kernel.taskmanager.switchContext(prev_task, current);
+    Kernel::getInstance()->taskmanager.freeTask(prev_task->pid);
+    Kernel::getInstance()->taskmanager.switchContext(prev_task, current);
     return 0;
 }
 
@@ -176,8 +176,8 @@ int sys_execve(const char *filename, char *const argv[], char *const envp[]){
         return ret;
     stack_end = ret;
 
-    Task *prev_task = kernel.taskmanager.getCurrentTask();
-    Task *current = kernel.taskmanager.getTask();
+    Task *prev_task = Kernel::getInstance()->taskmanager.getCurrentTask();
+    Task *current = Kernel::getInstance()->taskmanager.getTask();
 
     if(current == NULL){
         lcd_printf("Task Allocation Error\n");
@@ -230,7 +230,7 @@ int sys_execve(const char *filename, char *const argv[], char *const envp[]){
 
     invalidate_icache();
     invalidate_dcache();
-    kernel.taskmanager.switchContext(prev_task, current);
+    Kernel::getInstance()->taskmanager.switchContext(prev_task, current);
     
     return 0;
 }
@@ -250,7 +250,7 @@ int sys_open(const char *pathname, int flags){
         return ret;
     }
 
-    f->user = kernel.taskmanager.getCurrentTask()->pid;
+    f->user = Kernel::getInstance()->taskmanager.getCurrentTask()->pid;
     return f->num;
 }
 
@@ -301,7 +301,7 @@ int sys_close(int fd){
     if(fd < 0)
         return -1;
 
-    f = &kernel.files[fd];
+    f = &Kernel::getInstance()->files[fd];
     ret = f->close();
     delete f;
     return ret;
@@ -323,7 +323,7 @@ int sys_stat(const char *pathname, Stat *st){
 
 /******************************************************************************/
 int sys_brk(unsigned int brk){
-    Task *current = kernel.taskmanager.getCurrentTask();
+    Task *current = Kernel::getInstance()->taskmanager.getCurrentTask();
     if( brk > (uint)current->stack_end && 
         brk < (uint)current->stack_start - MAX_STACK_SIZE){
 
@@ -338,7 +338,7 @@ int sys_read(int fd, void *buf, unsigned int count){
     File *f;
     if(fd < 0) return -1;
 
-    f = &kernel.files[fd];
+    f = &Kernel::getInstance()->files[fd];
     ret = f->read(buf, count);
     return ret;
 }
@@ -350,7 +350,7 @@ int sys_write(int fd, const void *buf, unsigned int count){
     if(fd < 0)
         return -1;
 
-    f = &kernel.files[fd];
+    f = &Kernel::getInstance()->files[fd];
     ret = f->write(buf, count);
     return ret;
 }
@@ -387,8 +387,8 @@ int sys_chdir(const char *path){
         return -FAT_ERROR_NO_SUCH_FILE;
     }
 
-    delete kernel.current;
-    kernel.current = (FatFile *)f;
+    delete Kernel::getInstance()->current;
+    Kernel::getInstance()->current = (FatFile *)f;
     return 0;
 }
 
@@ -445,7 +445,7 @@ int sys_lseek(int fd, int offset, int whence){
     if(fd < 0)
         return -1;
 
-    f = &kernel.files[fd];
+    f = &Kernel::getInstance()->files[fd];
     ret = f->seek(offset, whence);
     return ret;
 }
