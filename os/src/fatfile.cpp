@@ -451,7 +451,7 @@ int FatFile::create(int mode, int isdir){
             return FAT_ERROR_DISC_IS_FULL;
 
         // allocate new cluster
-        this->entry.cluster = this->cluster.getTop();
+        this->entry.cluster = static_cast<ushort>(this->cluster.getTop());
 
         // update entry
         updateEntry();
@@ -469,7 +469,7 @@ int FatFile::create(int mode, int isdir){
         
 
         // ".." entry is always assigned here
-        ent.cluster = this->parent;
+        ent.cluster = static_cast<ushort>(this->parent);
         ent.name[1] = '.'; // ".."
         kernel.fat.writeEntry(&ent, 1);
     }else{
@@ -697,7 +697,7 @@ int FatFile::writeFile(const void *buf, uint count){
             return -FAT_ERROR_DISC_IS_FULL;
 
         if(prev != cluster.getTop()){
-            entry.cluster = cluster.getTop();
+            entry.cluster = static_cast<ushort>(cluster.getTop());
             updateEntry();
         }
     }
@@ -853,7 +853,7 @@ int FatFileName::set(const char *string){
     clear();
 
     // check illegal character
-    for(p = (char *)string; *p != 0; p++){
+    for(p = const_cast<char *>(string); *p != 0; p++){
         for(i = 0; i < 12; i++)
             if(*p == forbid_char[i])
                 return -1;

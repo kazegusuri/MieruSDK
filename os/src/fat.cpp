@@ -191,26 +191,26 @@ int Fat::updateTable(int index, int value){
             readSector(sec);
             if (mod == Fat::SECTOR_SIZE - 1) {
                 if (index % 2 == 0)
-                    buffer[mod] = value & 0xff;
+                    buffer[mod] = static_cast<uchar>(value & 0xff);
                 else
-                    buffer[mod] = (buffer[mod] & 0xf) | ((value << 4) & 0xf0); 
+                    buffer[mod] = static_cast<uchar>((buffer[mod] & 0xf) | ((value << 4) & 0xf0));
                 writeSector(sec);
 
                 readSector(sec + 1);
                 if (index % 2 == 0)
-                    buffer[0] = (buffer[0] & 0xf0) | ((value >> 8) & 0xf);
+                    buffer[0] = static_cast<uchar>((buffer[0] & 0xf0) | ((value >> 8) & 0xf));
                 else
-                    buffer[0] = (value >> 4) & 0xff;
+                    buffer[0] = static_cast<uchar>((value >> 4) & 0xff);
 
                 writeSector(sec + 1);
             } else {
                 if (index % 2 == 0) {
-                    buffer[mod] = value & 0xff;
-                    buffer[mod + 1] = ((buffer[mod + 1] & 0xf0) |
-                                       ((value >> 8) & 0xf));
+                    buffer[mod] = static_cast<uchar>(value & 0xff);
+                    buffer[mod + 1] = static_cast<uchar>(((buffer[mod + 1] & 0xf0) |
+                                                          ((value >> 8) & 0xf)));
                 } else {
-                    buffer[mod] = (buffer[mod] & 0xf) | ((value << 4) & 0xf0);
-                    buffer[mod + 1] = (value >> 4) & 0xff;
+                    buffer[mod] = static_cast<uchar>((buffer[mod] & 0xf) | ((value << 4) & 0xf0));
+                    buffer[mod + 1] = static_cast<uchar>((value >> 4) & 0xff);
                 }
                 writeSector(sec);
             }   
@@ -218,8 +218,8 @@ int Fat::updateTable(int index, int value){
             sec = fatbegin + fatsize * i + index * 2 / Fat::SECTOR_SIZE;
             mod = (index * 2) % Fat::SECTOR_SIZE;
             readSector(sec);
-            buffer[mod] = value & 0xff;
-            buffer[mod + 1] = (value >> 8) & 0xff;
+            buffer[mod] = static_cast<uchar>(value & 0xff);
+            buffer[mod + 1] = static_cast<uchar>((value >> 8) & 0xff);
             writeSector(sec);
         }
     }
@@ -242,17 +242,17 @@ int Fat::getEmptyCluster(){
         if (type == FAT12) {
             if(mod == -1){
                 if (i & 0x1)
-                    check = (lastbyte & 0xf0) | buffer[0];
+                    check = static_cast<char>((lastbyte & 0xf0) | buffer[0]);
                 else
-                    check = lastbyte | (buffer[0] & 0xf);
+                    check = static_cast<char>(lastbyte | (buffer[0] & 0xf));
             }else{
                 if (i & 0x1)
-                    check = (buffer[mod] & 0xf0) | buffer[mod + 1];
+                    check = static_cast<char>((buffer[mod] & 0xf0) | buffer[mod + 1]);
                 else
-                    check = buffer[mod] | (buffer[mod + 1] & 0xf);
+                    check = static_cast<char>(buffer[mod] | (buffer[mod + 1] & 0xf));
             }
         } else {
-            check = buffer[mod] | buffer[mod + 1];
+            check = static_cast<char>(buffer[mod] | buffer[mod + 1]);
         }
         if (check == 0)
             return i;

@@ -49,7 +49,7 @@ void Shell::run(){
     startup();
     prompt();
     for(;;){
-        uint key = getchar();
+        uchar key = static_cast<uchar>(getchar());
     
         if(mpc_oncontrol())
             control(key);
@@ -131,10 +131,10 @@ int Shell::move(int x, int y){
 /******************************************************************************/
 void Shell::startup(){
     int fd;
-    fd = sys_open((char *)"/init", O_RDONLY);
+    fd = sys_open(const_cast<char *>("/init"), O_RDONLY);
     if(fd < 0) return;
     sys_close(fd);
-    parse((char *)"/init");
+    parse(const_cast<char *>("/init"));
     
 
     // fd = sys_open((char *)"/startup", O_RDONLY);
@@ -244,7 +244,7 @@ void Shell::first(){
 void Shell::end(){
     uchar off;
     lcd_print((char *)&cmdbuf[curpos]);
-    off = cmdpos - curpos;
+    off = static_cast<uchar>(cmdpos - curpos);
     move(cursor.x + off, cursor.y);
     curpos = cmdpos;
 }
