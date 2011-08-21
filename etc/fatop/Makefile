@@ -7,6 +7,7 @@ OUTMMC  = out.dat_
 FILE    = 
 
 all:
+	mkdir -p mmcroot
 	gcc  -o $(TARGET) fatop.c
 
 run: in

@@ -11,6 +11,7 @@ EXECUTABLES = bin/SimMips bin/SimMipsM bin/SimMipsOS bin/SimMipsF \
 
 ##########################################################################
 all:
+	mkdir -p bin
 	${MAKE} -C ${CORE}
 	${MAKE} -C ${MC}
 	${MAKE} -C ${OS}
