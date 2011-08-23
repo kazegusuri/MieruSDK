@@ -386,12 +386,6 @@ int FatFile::open(int mode, int permission){
 
     this->mode = mode;
     this->pos = 0;
-    // lcd_printf("open %d\n", this->size);
-    // int i;
-    // for(i=0;i<8;i++){
-    //     lcd_printf("%c", this->entry.name[i]);
-    // }
-    // lcd_printf("\n");
   
     return 0;
 }

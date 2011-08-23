@@ -135,15 +135,6 @@ void Shell::startup(){
     if(fd < 0) return;
     sys_close(fd);
     parse(const_cast<char *>("/init"));
-    
-
-    // fd = sys_open((char *)"/startup", O_RDONLY);
-    // if(fd < 0) return;
-    // sys_close(fd);
-    // lcd_printf("Push enter to execute startup script (/startup).\n");
-    // nextline();
-    // mpc_waitkey();
-    // parse((char *)"sh /startup");
 }
 
 /******************************************************************************/

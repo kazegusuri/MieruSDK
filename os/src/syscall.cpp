@@ -41,7 +41,6 @@
 
 #define MAX_STACK_SIZE 4048
 #define syscall_table 0x300
-//extern unsigned int syscall_table;
 
 
 /******************************************************************************/
