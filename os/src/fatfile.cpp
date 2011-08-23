@@ -154,6 +154,7 @@ FatFile::~FatFile(){
 
 /******************************************************************************/
 void *FatFile::operator new(uint size){
+    __UNUSED_VARIABLE(size);
     int i;
     FatFile *file;
     for(i = 0; i < MAX_FILE; i++){
@@ -173,7 +174,7 @@ void *FatFile::operator new(uint size){
 }
 
 /******************************************************************************/
-void FatFile::operator delete(void *address){
+void FatFile::operator delete(void *address __UNUSED__){
 }
 
 /******************************************************************************/
@@ -359,14 +360,14 @@ File *FatFile::lookup(const char *name){
 }
 
 /******************************************************************************/
-int FatFile::open(int mode){
+int FatFile::open(int mode, int permission){
     int ret;
     if(!this->exist){
         if(!(mode & O_CREAT)){
             return -FAT_ERROR_NO_SUCH_FILE;
         }
 
-        ret = this->create(0, 0);
+        ret = this->create(permission, 0);
         if(ret < 0)
             return ret;
     }
@@ -396,7 +397,8 @@ int FatFile::open(int mode){
 }
 
 /******************************************************************************/
-int FatFile::create(int mode, int isdir){
+int FatFile::create(int permission, int isdir){
+    __UNUSED_VARIABLE(permission);
     FatCluster cl;
     uchar *p;
     bool found = false;

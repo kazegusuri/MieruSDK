@@ -206,7 +206,7 @@ void Shell::control(uchar key){
 
 /******************************************************************************/
 void Shell::alt(uchar key){
-
+    __UNUSED_VARIABLE(key);
 }
 
 /******************************************************************************/
@@ -553,6 +553,7 @@ int Shell::emb_help(){
 
 /******************************************************************************/
 int Shell::exec(int argc, char *argv[]){
+    __UNUSED_VARIABLE(argc);
     int ret;
     char path[128];
     snprintf(path, 128, "/bin/%s", argv[0]);

@@ -32,6 +32,7 @@
  */
 
 #pragma once
+#include <types.h>
 
 #define MAX_FILE 32
 
@@ -81,9 +82,9 @@ public:
     uint user;
 
     virtual ~File(){}
-    void operator delete(void *address){}
+    void operator delete(void *address __UNUSED__ ){}
     virtual File *lookup(const char *name)         = 0;
-    virtual int open(int flags)                    = 0;
+    virtual int open(int mode, int permission)     = 0;
     virtual int create(int mode, int isdir)        = 0;
     virtual int close()                            = 0;
     virtual int stat(Stat *st)                     = 0;

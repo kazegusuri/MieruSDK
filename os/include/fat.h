@@ -206,7 +206,7 @@ public:
     int parent;
 
     static void *operator new(uint size);
-    static void operator delete(void *address);
+    static void operator delete(void *address __UNUSED__);
 
     FatFile();
     FatFile(FatFile &fatfile);
@@ -215,8 +215,8 @@ public:
     ~FatFile();
 
     virtual File *lookup(const char *name);
-    int open(int mode);
-    virtual int create(int mode, int isdir);
+    int open(int mode, int permission);
+    virtual int create(int permission, int isdir);
     virtual int close();
     virtual int stat(Stat *st);
     virtual int seek(int offset, uint whence);

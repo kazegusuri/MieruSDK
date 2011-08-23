@@ -31,8 +31,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
+#include <types.h>
+
 // void *operator new(size_t size);
 // void operator delete(void *address);
 // void *operator new[[](size_t size);
 // void operator delete[]void *address);
-void* operator new(size_t size, void *address);
+void* operator new(size_t size __UNUSED__, void *address);

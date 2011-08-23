@@ -31,6 +31,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
+#include <types.h>
+
 class Point{
 public:
     int x;
@@ -41,7 +44,7 @@ public:
     Point(int _x, int _y);
     virtual ~Point(){};
 
-    static void operator delete(void *address){};
+    static void operator delete(void *address __UNUSED__ ){};
     bool operator==(const Point &p);
     Point &operator=(const Point &p);
 

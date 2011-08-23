@@ -153,7 +153,7 @@ int lcd_init(void)
 
 /* open and initalize tty, and send SV command if rotate is non-zero */
 /**********************************************************************/
-int lcd_ttyopen(int rotate)
+int lcd_ttyopen(int rotate __UNUSED__)
 {
     lcd_init();
     return 0;
@@ -166,7 +166,7 @@ void lcd_ttyclose()
 }
 
 /**********************************************************************/
-void lcd_rotate(int r)
+void lcd_rotate(int r __UNUSED__)
 {
 }
 
@@ -264,7 +264,7 @@ void lcd_settransparent(int t)
 }
 
 /**********************************************************************/
-void lcd_setreverse(int flag)
+void lcd_setreverse(int flag __UNUSED__)
 {
     // not implemented
 }

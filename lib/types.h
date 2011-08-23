@@ -38,7 +38,8 @@
  *基本的な型を定義する．
  */
 
-
+#define __UNUSED__ __attribute__ ((unused))
+#define __UNUSED_VARIABLE(x) (void)(x)
 #define NULL  0
 #define TRUE  1
 #define FALSE 0

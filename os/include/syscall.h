@@ -70,7 +70,7 @@ void set_syscall_table(unsigned int syscall_nr, void *addr);
 int sys_init(struct task_report *repo);
 int sys_fin(const struct task_report *repo);
 int sys_exit(int status);
-int sys_open(const char *pathname, int flags);
+int sys_open(const char *pathname, int flags, int mode = 0);
 int sys_creat(const char *pathname, int mode);
 int sys_close(int fd);
 int sys_stat(const char *pathname, Stat *st);

@@ -146,6 +146,7 @@ int sys_fin(const struct task_report *repo){
 
 /******************************************************************************/
 int sys_exit(int status){
+    __UNUSED_VARIABLE(status);
     Task *prev_task = Kernel::getInstance()->taskmanager.getCurrentTask();
     Task *current = Kernel::getInstance()->taskmanager.getKernelTask();
 
@@ -164,6 +165,7 @@ int sys_exit(int status){
 
 /******************************************************************************/
 int sys_execve(const char *filename, char *const argv[], char *const envp[]){
+    __UNUSED_VARIABLE(envp);
     int ret;
     unsigned int sp;
     unsigned int *tmp_sp;
@@ -236,7 +238,7 @@ int sys_execve(const char *filename, char *const argv[], char *const envp[]){
 }
 
 /******************************************************************************/
-int sys_open(const char *pathname, int flags){
+int sys_open(const char *pathname, int flags, int mode){
     int ret;
     File *f;
 
@@ -244,7 +246,7 @@ int sys_open(const char *pathname, int flags){
     if(f == NULL)
         return -FAT_ERROR_INVALID_FILE_NAME;
 
-    ret  = f->open(flags);
+    ret  = f->open(flags, mode);
     if(ret < 0){
         delete f;
         return ret;
@@ -256,7 +258,7 @@ int sys_open(const char *pathname, int flags){
 
 /******************************************************************************/
 int sys_creat(const char *pathname, int mode){
-    return sys_open(pathname, O_WRONLY | O_CREAT | O_TRUNK);
+    return sys_open(pathname, O_WRONLY | O_CREAT | O_TRUNK, mode);
 }
 
 /******************************************************************************/
