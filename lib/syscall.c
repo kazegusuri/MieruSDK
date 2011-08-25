@@ -57,24 +57,24 @@ int __attribute__((noinline)) _syscall(
 	register uint a2 asm("$6") = (uint) arg3;
 	register uint a3 asm("$7") = (uint) arg4;
 
-    /* __asm__ volatile ( */
-    /*     "syscall   \n" */
-    /*     "move %0, $v0 \n" */
-    /*     : "=&r" (v0) */
-    /*     : "r" (v0) , "r" (a0), "r" (a1), "r" (a2), "r" (a3) */
-    /*     ); */
     __asm__ volatile (
-        "li $k0, 0x100 \n"
-        "addiu $sp, $sp, -20 \n" // $a0-$a3 + $sp
-        "sw $ra, 16($sp) \n"
-        "jalr $k0 \n"
-        "nop \n"
-        "lw $ra, 16($sp) \n"
-        "addiu $sp, $sp, 20 \n"
+        "syscall   \n"
         "move %0, $v0 \n"
         : "=&r" (v0)
         : "r" (v0) , "r" (a0), "r" (a1), "r" (a2), "r" (a3)
         );
+    /* __asm__ volatile ( */
+    /*     "li $k0, 0x100 \n" */
+    /*     "addiu $sp, $sp, -20 \n" // $a0-$a3 + $sp */
+    /*     "sw $ra, 16($sp) \n" */
+    /*     "jalr $k0 \n" */
+    /*     "nop \n" */
+    /*     "lw $ra, 16($sp) \n" */
+    /*     "addiu $sp, $sp, 20 \n" */
+    /*     "move %0, $v0 \n" */
+    /*     : "=&r" (v0) */
+    /*     : "r" (v0) , "r" (a0), "r" (a1), "r" (a2), "r" (a3) */
+    /*     ); */
 
 	return v0;
 }

@@ -14,7 +14,8 @@ MAKETYPE = std
 
 COMPILE = $(MIPSCXX)
 WARNINGOPT = -Wall -Wextra -Wformat=2 -Wcast-qual -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith -Winit-self -Wredundant-decls 
-CFLAGS  ?= $(WARNINGOPT) -ffreestanding -msoft-float -Os -nostdlib -nostdinc -fno-builtin -fno-exceptions -fno-rtti -fno-strict-aliasing  -nostartfiles -nodefaultlibs -fno-stack-protector -fcheck-new -I$(INCDIR) -I$(LIBDIR) $(MACROOPT)
+CFLAGS  ?= -g $(WARNINGOPT) -ffreestanding -msoft-float -Os -nostdlib -nostdinc -fno-builtin -fno-exceptions -fno-rtti -fno-strict-aliasing  -nostartfiles -nodefaultlibs -fno-stack-protector -fcheck-new -I$(INCDIR) -I$(LIBDIR) $(MACROOPT)
+SFLAGS  ?= -mips32
 
 
 OBJS = $(SRCDIR)/cmain.o $(SRCDIR)/kernel.o $(SRCDIR)/boot.o $(SRCDIR)/task.o \

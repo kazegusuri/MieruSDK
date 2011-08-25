@@ -32,7 +32,7 @@ endif
 
 export CFLAGS  ?= -Wall -O2 
 CFLAGS += -ffreestanding -msoft-float -I$(LIBDIR) $(MACROOPT)
-export SFLAGS  = 
+export SFLAGS  ?= 
 export LFLAGS  = -T $(SCRIPT) -L$(LIBDIR) --allow-multiple-definition
 MEMSIZE = 512
 SIMDEFARGS = -t$(strip $(LCDTYPE)) -M $(MEMTXT) $(TARGET)

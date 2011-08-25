@@ -78,8 +78,37 @@
         .ent exc_entry
         .extern syscall_table
 exc_entry:
-        b       .SYSCALL_JMP # syscall tmp        
+#        b       .SYSCALL_JMP   ## syscall jmp version
+        b       .SYSCALL # syscall
         nop
+
+.SYSCALL:
+        SAVE_SYS
+        li      $k0, 0
+        mtc0    $k0, $12       ## clear status reg
+        
+        li      $t0, 4000      ## check syscall_nr
+        ble     $t0, $v0, $end_sys
+        nop
+        li      $t0, 0x300     ## syscall table
+        sll     $v0, $v0, 2
+        addu    $t0, $t0, $v0  ## table[syscall_nr]
+        lw      $t0, 0($t0)
+        nop
+        jalr    $t0
+        nop
+$end_sys:
+        RESTORE_SYS
+        mfc0    $k0, $14       ## load epc
+        addi    $k0, $k0, 4    ## increment epc
+        mtc0    $k0, $14       ## for pointing next instruction
+        eret                   
+        nop
+
+.INT:
+        eret
+        nop
+
 
 .SYSCALL_JMP:
         SAVE_SYS
