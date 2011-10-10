@@ -86,3 +86,11 @@ int sys_lseek(int fd, int offset, int whence);
 int sys_getcwd(char *buf, unsigned int size);
 
 int sys_null();
+
+/* namespace system{ */
+/*     int _syscall(unsigned int syscall_nr, */
+/*                  unsigned int arg1, */
+/*                  unsigned int arg2, */
+/*                  unsigned int arg3, */
+/*                  unsigned int arg4); */
+/* } */

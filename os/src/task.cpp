@@ -128,12 +128,12 @@ void __attribute__((noinline)) TaskManager::switch_to(thread_struct *prev, threa
         "sw    $fp, 104($a0);"
         "sw    $ra, 108($a0);"
         
-//        "mfc0	$t0, $12;"      // load status reg
-//        "nop;"
-//        "mfc0  $t1, $14;"      // load epc reg
-//        "nop;"
-//        "sw    $t0, 116($a0);" // store status
-//        "sw    $t1, 112($a0);" // store epc
+        "mfc0  $t0, $12;"      // load status reg
+        "mfc0  $t1, $13;"      // load cause reg
+        "mfc0  $t2, $14;"      // load epc reg
+        "sw    $t0, 116($a0);" // store status
+        "sw    $t1, 120($a0);" // store cause
+        "sw    $t2, 112($a0);" // store epc
 
         // restore next process
         "lw    $s0, 56($a1);"
@@ -149,14 +149,17 @@ void __attribute__((noinline)) TaskManager::switch_to(thread_struct *prev, threa
         "lw    $fp, 104($a1);"
         "lw    $ra, 108($a1);"
 
-//        "lw    $t0, 112($a1);" // load epc
-//        "lw    $t1, 116($a1);" // load status
-//        "mtc0  $t0, $14;"      // store epc
-//        "mtc0  $t1, $12;"      // store status
+        "lw    $t0, 112($a1);" // load epc
+        "lw    $t1, 120($a1);" // load cause
+        "lw    $t2, 116($a1);" // load status
+        "mtc0  $t0, $14;"      // store epc
+        "mtc0  $t1, $13;"      // store cause
+        "mtc0  $t2, $12;"      // store status
 
         :
         : "r" (__a0), "r" (__a1)
         );
+    return;
 }
 
 /******************************************************************************/

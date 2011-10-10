@@ -38,9 +38,12 @@
 #include <task.h>
 #include <elf.h>
 #include <cache.h>
+#include <exception.h>
 
 #define MAX_STACK_SIZE 4048
-#define syscall_table 0x300
+//#define syscall_table 0x600
+
+static void *syscall_table[64];
 
 
 /******************************************************************************/
@@ -101,7 +104,10 @@ File *preopen(const char *name){
 /******************************************************************************/
 void init_syscall(void){
     //void **table = (void **)&_syscall_table;
+    void **table_addr = (void **)SYSCALL_TABLE_ADDR;
     void **table = (void **)syscall_table;
+
+    *table_addr = table;
     for(int i = 0; i < 64; i++)
         table[i] = (void *)sys_null;
 

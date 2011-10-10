@@ -1,11 +1,7 @@
-/******************************************************************************/
-/* MieruOS: Task v0.1                                                         */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-06-14 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
  * All rights reserved. 
+ * Copyright (c) 2011 sabottenda.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,68 +27,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file exception.h
+ *@brief Header file for exception.
+ *@author sabottenda
+ *@date 2011/10/09
+ */
+
 #pragma once
-#include <syscall.h>
-#include <mierulib.h>
 
-#define TASK_STATE_NOALLOC   0x00
-#define TASK_STATE_ALLOC     0x01
-#define TASK_STATE_RUNNING   0x02
-#define TASK_STATE_WAITING   0x04
-#define TASK_STATE_STOP      0x20
-
+#define TIMER_HANDLER_ADDR 0x00f0
+#define SYSCALL_TABLE_ADDR 0x00f4
 
 #ifndef __ASSEMBLY__
-
-#define MAX_TASK_NUM 3
-
-
-typedef struct _thread_struct{
-    long v0, v1, a0, a1, a2, a3;
-    long t0, t1, t2, t3, t4, t5, t6, t7;
-    long s0, s1, s2, s3, s4, s5, s6, s7;
-    long t8, t9;
-    long gp, sp, fp, ra; //gp,sp,fp,ra
-
-    unsigned int cp0_epc;
-    unsigned int cp0_status;
-    unsigned int cp0_cause;
-    long ksp;
-}thread_struct;
-
-class Task{
-public:
-    int state;
-    int pid;
-    int stack_start;
-    int stack_end;
-
-    struct task_report report;
-
-    unsigned int brk;
-    thread_struct tss;
-
-    Task();
-    
-};
-
-
-class TaskManager{
-public:
-    int remain;
-    Task tasks[MAX_TASK_NUM];
-    Task *current;
-    Task *previous;
-
-    TaskManager();
-    void init();
-    Task *getTask();
-    Task *getCurrentTask();
-    Task *getPreviousTask();
-    Task *getKernelTask();
-    void switchContext(Task *prev, Task *cur);
-    void switch_to(thread_struct *prev, thread_struct *cur);
-    void freeTask(int pid);
-};
-
 #endif

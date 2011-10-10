@@ -84,8 +84,13 @@ _start:
 .INIT:
 		INIT_REG
 		sw		$zero, 0($zero)
-#		li		$t0, 0x100
-#		mtc0	$t0, $11	#Compare register
+        move    $k0, $0
+        li      $k0, 1
+        mtc0    $k0, $12    #Status register
+		li		$k0, 0x100
+#		li		$k0, 0xf00
+		mtc0	$k0, $11	#Compare register
+        
 		li		$sp, 0x1fff0		# 128KB
 		j		main
 		nop

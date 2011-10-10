@@ -34,6 +34,9 @@
 #pragma once
 
 #define MIERUOS_VERSION "v0.5.6"
+#ifndef MIERU_OS
+#define MIERU_OS
+#endif
 
 #include <mierulib.h>
 #include <file.h>

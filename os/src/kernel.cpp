@@ -38,10 +38,18 @@
 #include <task.h>
 #include <shell.h>
 #include <cache.h>
+#include <timer.h>
+#include <exception.h>
 
 extern void sh_mainloop();
 char kernel_buffer[sizeof(Kernel)];
 Kernel *Kernel::_instance = NULL;
+
+void process1();
+void process2();
+
+extern uint __timer_handler_addr[];
+extern uint __syscall_table_addr[];
 
 /******************************************************************************/
 extern "C" void __cxa_pure_virtual(){
@@ -87,6 +95,7 @@ void Kernel::init(){
     lcd_ttyopen(1);
 
     init_syscall();
+    init_timer();
     ret = fat.init();
     if(ret < 0){
         switch(-ret){
@@ -106,10 +115,18 @@ void Kernel::init(){
         lcd_printf("Stop Kernel\n");
         for(;;);
     }
-    
+
+    if (TIMER_HANDLER_ADDR != (unsigned int)__timer_handler_addr){
+        lcd_dprintf("Configuration Error: timer_handler address doesn't match\n");
+        lcd_dprintf("  define:%08x var:%08x\n", TIMER_HANDLER_ADDR, __timer_handler_addr);
+    }
+    if (SYSCALL_TABLE_ADDR != (unsigned int)__syscall_table_addr){
+        lcd_dprintf("Configuration Error: syscall table address doesn't match\n");
+        lcd_dprintf("  define:%08x var:%08x\n", SYSCALL_TABLE_ADDR, __syscall_table_addr);
+    }
+
     taskmanager.init();
     init_cache();
-
 }
 
 /******************************************************************************/
@@ -127,9 +144,79 @@ void Kernel::message(){
 
 /******************************************************************************/
 void Kernel::start(){
-    Shell sh;
-    message();
-    sh.run();
+    unsigned int gp;
+    
+    Task *current = taskmanager.getCurrentTask();
+    Task *t1 = taskmanager.getTask();
+    Task *t2 = taskmanager.getTask();
+
+    uint sp1 = 0x50000 - 16;
+    uint sp2 = 0x80000 - 16;
+
+    __asm__ volatile ("move %0, $gp;" : "=r" (gp));
+    lcd_dprintf("%d %d %08x\n", t1->pid, t2->pid, gp);
+
+    t1->tss.sp = sp1;
+    t1->tss.gp = gp;
+    t1->tss.ra = (uint)process1;
+    t1->tss.cp0_status = 1;
+    t1->tss.cp0_epc = 0;
+    t1->tss.cp0_cause = 0;
+    t1->stack_start = sp1;
+    t1->stack_end   = 0x20000 + 16;
+    t1->brk         = 0x20000 + 16;
+
+    lcd_dprintf("%08x \n", t1->tss.ra);
+
+    t2->tss.sp = sp2;
+    t2->tss.gp = gp;
+    t2->tss.ra = (uint)process2;
+    t2->tss.cp0_status = 1;
+    t2->tss.cp0_epc = 0;
+    t2->tss.cp0_cause = 0;
+    t2->stack_start = sp2;
+    t2->stack_end   = sp1+32;
+    t2->brk         = sp1+32;
+
+    invalidate_icache();
+    invalidate_dcache();
+
+    lcd_dprintf("start!!!\n");
+    //taskmanager.switchContext(current, t1);
+
+
+    for(;;);
+    // Shell sh;
+    // message();
+    // sh.run();
 }
 
 /******************************************************************************/
+
+void process1(){
+    for(;;){
+        // lcd_dprintf("process1\n");
+        // usleep(100000);
+    }
+
+    Kernel::getInstance()->taskmanager.switchContext(
+        Kernel::getInstance()->taskmanager.getCurrentTask(), 
+        &Kernel::getInstance()->taskmanager.tasks[2]);
+    lcd_dprintf("process1\n");
+    for(;;);
+}
+
+void process2(){
+    for(;;){
+        //lcd_dprintf("process2\n");
+        //usleep(100000);
+    }
+    lcd_dprintf("process2\n");
+    //usleep(1000000);
+    Kernel::getInstance()->taskmanager.switchContext(
+        Kernel::getInstance()->taskmanager.getCurrentTask(), 
+        &Kernel::getInstance()->taskmanager.tasks[1]);
+    lcd_dprintf("process2\n");
+
+    for(;;);
+}

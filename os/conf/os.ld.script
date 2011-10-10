@@ -3,9 +3,13 @@ ENTRY(_start)
 
 SECTIONS
 {
-  .startup 0x000   : { ./src/boot.o(.text) }
-  excecption 0x100 : { ./src/exc.o(.text) }
-  . = 0x400;
+  .startup 0x0000   : { ./src/boot.o(.text) }
+
+
+  PROVIDE( __timer_handler_addr = 0x00f0);
+  PROVIDE( __syscall_table_addr = 0x00f4);
+  excecption 0x0100 : { ./src/exc.o(.text) }
+  . = 0x0800;
 
   .init            : { KEEP (*(.init)) } = 0
   .plt             : { *(.plt) }
