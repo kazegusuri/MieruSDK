@@ -38,6 +38,8 @@
 #define MIERU_OS
 #endif
 
+#define _offsetof(type, member) ((size_t)&((type*)0)->member)
+
 #include <mierulib.h>
 #include <file.h>
 #include <syscall.h>

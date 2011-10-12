@@ -115,51 +115,74 @@ void __attribute__((noinline)) TaskManager::switch_to(thread_struct *prev, threa
     register unsigned long __a1 asm("$5") = (unsigned long) cur;
     __asm__ volatile (
         // save prev process
-        "sw    $s0,  56($a0);"
-        "sw    $s1,  60($a0);"
-        "sw    $s2,  64($a0);"
-        "sw    $s3,  68($a0);"
-        "sw    $s4,  72($a0);"
-        "sw    $s5,  76($a0);"
-        "sw    $s6,  80($a0);"
-        "sw    $s7,  84($a0);"
-        "sw    $gp,  96($a0);"
-        "sw    $sp, 100($a0);"
-        "sw    $fp, 104($a0);"
-        "sw    $ra, 108($a0);"
+        "sw    $s0,  60($a0);"
+        "sw    $s1,  64($a0);"
+        "sw    $s2,  68($a0);"
+        "sw    $s3,  72($a0);"
+        "sw    $s4,  76($a0);"
+        "sw    $s5,  80($a0);"
+        "sw    $s6,  84($a0);"
+        "sw    $s7,  88($a0);"
+        "sw    $gp, 108($a0);"
+        "sw    $sp, 112($a0);"
+        "sw    $fp, 116($a0);"
+        "sw    $ra, 120($a0);"
         
         "mfc0  $t0, $12;"      // load status reg
         "mfc0  $t1, $13;"      // load cause reg
         "mfc0  $t2, $14;"      // load epc reg
-        "sw    $t0, 116($a0);" // store status
-        "sw    $t1, 120($a0);" // store cause
-        "sw    $t2, 112($a0);" // store epc
+        "sw    $t0, 124($a0);" // store status
+        "sw    $t1, 128($a0);" // store cause
+        "sw    $t2, 132($a0);" // store epc
 
         // restore next process
-        "lw    $s0, 56($a1);"
-        "lw    $s1, 60($a1);"
-        "lw    $s2, 64($a1);"
-        "lw    $s3, 68($a1);"
-        "lw    $s4, 72($a1);"
-        "lw    $s5, 76($a1);"
-        "lw    $s6, 80($a1);"
-        "lw    $s7, 84($a1);"
-        "lw    $gp, 96($a1);"
-        "lw    $sp, 100($a1);"
-        "lw    $fp, 104($a1);"
-        "lw    $ra, 108($a1);"
+        "lw    $s0, 60($a1);"
+        "lw    $s1, 64($a1);"
+        "lw    $s2, 68($a1);"
+        "lw    $s3, 72($a1);"
+        "lw    $s4, 76($a1);"
+        "lw    $s5, 80($a1);"
+        "lw    $s6, 84($a1);"
+        "lw    $s7, 88($a1);"
+        "lw    $gp, 108($a1);"
+        "lw    $sp, 112($a1);"
+        "lw    $fp, 116($a1);"
+        "lw    $ra, 120($a1);"
 
-        "lw    $t0, 112($a1);" // load epc
-        "lw    $t1, 120($a1);" // load cause
-        "lw    $t2, 116($a1);" // load status
+        "lw    $t0, 132($a1);" // load epc
+        "lw    $t1, 128($a1);" // load cause
+        "lw    $t2, 124($a1);" // load status
         "mtc0  $t0, $14;"      // store epc
         "mtc0  $t1, $13;"      // store cause
         "mtc0  $t2, $12;"      // store status
 
         :
         : "r" (__a0), "r" (__a1)
+        : "%t0", "%t1", "%t2"
         );
     return;
 }
 
 /******************************************************************************/
+void print(const thread_struct &ts){
+    lcd_dprintf("$zero     $at       $v0       $v1       $a0       $a1       $a2       $a3\n");
+    lcd_dprintf("%08x  %08x  %08x  %08x  %08x  %08x  %08x  %08x\n",
+                0, ts.at, ts.v0, ts.v1, ts.a0, ts.a1, ts.a2, ts.a3);
+    lcd_dprintf("$t0       $t1       $t2       $t3       $t4       $t5       $t6       $t7\n");
+    lcd_dprintf("%08x  %08x  %08x  %08x  %08x  %08x  %08x  %08x\n",
+                ts.t0, ts.t1, ts.t2, ts.t3, ts.t4, ts.t5, ts.t6, ts.t7);
+    lcd_dprintf("$s0       $s1       $s2       $s3       $s4       $s5       $s6       $s7\n");
+    lcd_dprintf("%08x  %08x  %08x  %08x  %08x  %08x  %08x  %08x\n",
+                ts.s0, ts.s1, ts.s2, ts.s3, ts.s4, ts.s5, ts.s6, ts.s7);
+    lcd_dprintf("$t8       $t9       $k0       $k1       $gp       $sp       $fp       $ra\n");
+    lcd_dprintf("%08x  %08x  %08x  %08x  %08x  %08x  %08x  %08x\n",
+                ts.t8, ts.t9, ts.k0, ts.k1, ts.gp, ts.sp, ts.fp, ts.ra);
+
+    lcd_dprintf("$status   $cause    $epc      ---       ---       ---       ---       ---\n");
+    lcd_dprintf("%08x  %08x  %08x  %08x  %08x  %08x  %08x  %08x\n",
+                ts.cp0_status, ts.cp0_cause, ts.cp0_epc, 0, 0, 0, 0, 0);
+    
+}
+
+/******************************************************************************/
+

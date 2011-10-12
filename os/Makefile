@@ -20,7 +20,8 @@ SFLAGS  ?= -mips32r2
 
 OBJS = $(SRCDIR)/cmain.o $(SRCDIR)/kernel.o $(SRCDIR)/boot.o $(SRCDIR)/task.o \
 	$(LIBDIR)/mierulib.o $(LIBDIR)/itcfunc.o $(LIBDIR)/syscall.o $(SRCDIR)/new.o \
-	$(SRCDIR)/exc.o $(SRCDIR)/syscall.o $(SRCDIR)/timer.o \
+	$(SRCDIR)/exception.o \
+	$(SRCDIR)/entry.o $(SRCDIR)/syscall.o $(SRCDIR)/timer.o \
 	$(SRCDIR)/fatfile.o $(SRCDIR)/fat.o $(SRCDIR)/elf.o \
 	$(SRCDIR)/shell.o $(SRCDIR)/point.o $(SRCDIR)/cache.o
 

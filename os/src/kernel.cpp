@@ -48,9 +48,6 @@ Kernel *Kernel::_instance = NULL;
 void process1();
 void process2();
 
-extern uint __timer_handler_addr[];
-extern uint __syscall_table_addr[];
-
 /******************************************************************************/
 extern "C" void __cxa_pure_virtual(){
     lcd_cls();
@@ -96,6 +93,9 @@ void Kernel::init(){
 
     init_syscall();
     init_timer();
+    init_exception();
+    clear_kernel_mode();
+    enable_global_interupt();
     ret = fat.init();
     if(ret < 0){
         switch(-ret){
@@ -116,17 +116,13 @@ void Kernel::init(){
         for(;;);
     }
 
-    if (TIMER_HANDLER_ADDR != (unsigned int)__timer_handler_addr){
-        lcd_dprintf("Configuration Error: timer_handler address doesn't match\n");
-        lcd_dprintf("  define:%08x var:%08x\n", TIMER_HANDLER_ADDR, __timer_handler_addr);
-    }
-    if (SYSCALL_TABLE_ADDR != (unsigned int)__syscall_table_addr){
-        lcd_dprintf("Configuration Error: syscall table address doesn't match\n");
-        lcd_dprintf("  define:%08x var:%08x\n", SYSCALL_TABLE_ADDR, __syscall_table_addr);
-    }
-
     taskmanager.init();
     init_cache();
+
+    extern uint __stack_end[]; // defined by linker
+    extern uint __stack_start[]; // defined by linker
+    lcd_dprintf("stack_end:%08x\n", __stack_end);
+    lcd_dprintf("stack_start:%08x\n", __stack_start);
 }
 
 /******************************************************************************/
@@ -144,20 +140,24 @@ void Kernel::message(){
 
 /******************************************************************************/
 void Kernel::start(){
+    Task *current = taskmanager.getCurrentTask();
     unsigned int gp;
     
-    Task *current = taskmanager.getCurrentTask();
+    //ret = system::_syscall(0,104,111,1200,0xffff);
+    //lcd_dprintf("ret %d\n", ret);
+    //for(;;);
+
     Task *t1 = taskmanager.getTask();
     Task *t2 = taskmanager.getTask();
 
     uint sp1 = 0x50000 - 16;
     uint sp2 = 0x80000 - 16;
 
-    __asm__ volatile ("move %0, $gp;" : "=r" (gp));
-    lcd_dprintf("%d %d %08x\n", t1->pid, t2->pid, gp);
+    // __asm__ volatile ("move %0, $gp;" : "=r" (gp));
+    // lcd_dprintf("%d %d %08x\n", t1->pid, t2->pid, gp);
 
     t1->tss.sp = sp1;
-    t1->tss.gp = gp;
+    //t1->tss.gp = gp;
     t1->tss.ra = (uint)process1;
     t1->tss.cp0_status = 1;
     t1->tss.cp0_epc = 0;
@@ -169,7 +169,7 @@ void Kernel::start(){
     lcd_dprintf("%08x \n", t1->tss.ra);
 
     t2->tss.sp = sp2;
-    t2->tss.gp = gp;
+    //t2->tss.gp = gp;
     t2->tss.ra = (uint)process2;
     t2->tss.cp0_status = 1;
     t2->tss.cp0_epc = 0;
@@ -195,8 +195,8 @@ void Kernel::start(){
 
 void process1(){
     for(;;){
-        // lcd_dprintf("process1\n");
-        // usleep(100000);
+        lcd_dprintf("process1\n");
+        usleep(100000);
     }
 
     Kernel::getInstance()->taskmanager.switchContext(
@@ -208,8 +208,8 @@ void process1(){
 
 void process2(){
     for(;;){
-        //lcd_dprintf("process2\n");
-        //usleep(100000);
+        lcd_dprintf("process2\n");
+        usleep(100000);
     }
     lcd_dprintf("process2\n");
     //usleep(1000000);

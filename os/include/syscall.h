@@ -66,6 +66,7 @@ struct task_report{
 
 void init_syscall(void);
 void set_syscall_table(unsigned int syscall_nr, void *addr);
+uint syscall_handler(uint a0, uint a1, uint a2, uint a3, uint syscall_nr);
 
 int sys_init(struct task_report *repo);
 int sys_fin(const struct task_report *repo);

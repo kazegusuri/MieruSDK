@@ -1,7 +1,8 @@
 
 #pragma once
 
+void clear_kernel_mode();
 void disable_global_interupt();
 void enable_global_interupt();
 void init_timer();
-extern "C" void timer_exception();
+void timer_handler();

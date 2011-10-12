@@ -1,8 +1,3 @@
-################################################################################
-##  MieruPC Project: Startup asm v0.1                                          #
-##	written by Masahiro Sano, Arch Lab. Tokyo Tech                  2010-07-16 #
-################################################################################
-
 ##
 ## Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
 ## All rights reserved. 
@@ -31,11 +26,6 @@
 ## THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 
-		.data
-		.extern main
-		.abicalls
-		.text
-		
 .macro	INIT_REG
 		.set 	noat
         move    $at, $0
@@ -71,37 +61,27 @@
         move    $ra, $0
 .endm
 
-		
+		.data
+		.extern main
+		.abicalls
+		.text
         .globl _start
         .ent _start
 _start:
-        nop
+        .set noreorder
 		j		.INIT
-		nop
+        nop
 		j		.ERROR
 		nop
 
 .INIT:
 		INIT_REG
 		sw		$zero, 0($zero)
-        move    $k0, $0
-        li      $k0, 1
-        mtc0    $k0, $12    #Status register
-		li		$k0, 0x100
-#		li		$k0, 0xf00
-		mtc0	$k0, $11	#Compare register
-        
 		li		$sp, 0x1fff0		# 128KB
 		j		main
 		nop
 
-		
-
 .ERROR:
-		j		.LOOP
-		nop
-
-.LOOP:
-		b		.LOOP
+		j		.ERROR
 		nop
         .end _start

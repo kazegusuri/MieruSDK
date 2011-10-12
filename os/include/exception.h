@@ -35,8 +35,44 @@
 
 #pragma once
 
-#define TIMER_HANDLER_ADDR 0x00f0
-#define SYSCALL_TABLE_ADDR 0x00f4
+#define EXCEPTION_ENTRY_ADDR 0x00f8
+
+#define EXCCODE_INT       0
+#define EXCCODE_MOD       1
+#define EXCCODE_TLBL      2
+#define EXCCODE_TLBS      3
+#define EXCCODE_ADEL      4
+#define EXCCODE_ADES      5
+#define EXCCODE_IBE       6
+#define EXCCODE_DBE       7
+#define EXCCODE_SYSCALL   8
+#define EXCCODE_BP        9
+#define EXCCODE_RI        10
+#define EXCCODE_CPU       11
+#define EXCCODE_OV        12
+#define EXCCODE_TRAP      13
+#define EXCCODE_UNUSED0   14
+#define EXCCODE_FPE       15
+#define EXCCODE_CUSTOM0   16
+#define EXCCODE_CUSTOM1   17
+#define EXCCODE_C2E       18
+#define EXCCODE_RESERVED0 19
+#define EXCCODE_RESERVED1 20
+#define EXCCODE_RESERVED2 21
+#define EXCCODE_MDMX      22
+#define EXCCODE_WATCH     23
+#define EXCCODE_MCHECK    24
+#define EXCCODE_THREAD    25
+#define EXCCODE_DSP       26
+#define EXCCODE_RESERVED3 27
+#define EXCCODE_RESERVED4 28
+#define EXCCODE_RESERVED5 29
+#define EXCCODE_CACHERR   30
+#define EXCCODE_UNUSED1   31
 
 #ifndef __ASSEMBLY__
+#include <task.h>
+
+void init_exception();
+extern "C" void exception_handler(thread_struct *ts);
 #endif

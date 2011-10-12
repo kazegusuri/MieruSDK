@@ -41,9 +41,8 @@
 #include <exception.h>
 
 #define MAX_STACK_SIZE 4048
-//#define syscall_table 0x600
 
-static void *syscall_table[64];
+static int (*syscall_table[64])(uint,uint,uint,uint);
 
 
 /******************************************************************************/
@@ -103,11 +102,8 @@ File *preopen(const char *name){
 
 /******************************************************************************/
 void init_syscall(void){
-    //void **table = (void **)&_syscall_table;
-    void **table_addr = (void **)SYSCALL_TABLE_ADDR;
     void **table = (void **)syscall_table;
 
-    *table_addr = table;
     for(int i = 0; i < 64; i++)
         table[i] = (void *)sys_null;
 
@@ -128,6 +124,12 @@ void init_syscall(void){
     table[SYSCALL_LSEEK]  = (void *)sys_lseek;
     table[SYSCALL_BRK]    = (void *)sys_brk;
     table[SYSCALL_MKDIR]  = (void *)sys_mkdir;
+}
+
+/******************************************************************************/
+uint syscall_handler(uint a0, uint a1, uint a2, uint a3, uint syscall_nr){
+    int (*sys)(uint,uint,uint,uint) = syscall_table[syscall_nr];
+    return sys(a0,a1,a2,a3);
 }
 
 /******************************************************************************/

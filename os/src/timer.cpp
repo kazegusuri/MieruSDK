@@ -35,52 +35,26 @@
 
 #include <mierulib.h>
 #include <kernel.h>
-#include <syscall.h>
 #include <timer.h>
 #include <exception.h>
 
-void disable_global_interupt(){
-    __asm__ volatile (
-        "mfc0    $t0, $12\n"
-        "addiu   $t1, $zero, -2\n"
-        "and     $t0, $t0, $1\n"
-        "mtc0    $t0, $12\n"
-        );
-}
-
-void enable_global_interupt(){
-    __asm__ volatile (
-        "mfc0    $t0, $12\n"
-        "ori     $t0, $t0, 1\n"
-        "mtc0    $t0, $12\n"
+inline void update_timer(int n){
+    __asm__ (
+        "mfc0    $t0, $11\n"
+        "addu    $t0, $t0, %0 \n" 
+        "mtc0    $t0, $11\n" 
+        :  : "r" (n) : "%t0"
         );
 }
 
 void init_timer(){
-    uint *timer_handler= (uint *)TIMER_HANDLER_ADDR;
-    lcd_dprintf("timer %08x\n", timer_handler);
-    *timer_handler = (uint)timer_exception;
-    //void (*timer_handler)() = (void (*)())TIMER_HANDLER_ADDR;
-
-    lcd_dprintf("timer %08x %08x\n", *timer_handler, timer_exception);
-    
-    //*timer_handler = 100;
-    //*timer_handler = timer_exception;
-    //void **table = (void **)syscall_table;
-
+    update_timer(0x100);
 }
 
-extern "C" void timer_exception(){
+void timer_handler(){
     disable_global_interupt();
+    update_timer(0x100);
     int pid = Kernel::getInstance()->taskmanager.getCurrentTask()->pid;
-    //lcd_dprintf("timer start pid %d\n", pid);
-    uint epc;
-    // __asm__ volatile (
-    //     "mfc0 $v1, $14 \n"
-    //     "move %0, $v1 \n"
-    //     : "=&r" (epc)
-    //     );
-    //lcd_dprintf("epc %08x\n", epc);
 
     if(pid == 0){
         Kernel::getInstance()->taskmanager.switchContext(
@@ -98,6 +72,5 @@ extern "C" void timer_exception(){
             &Kernel::getInstance()->taskmanager.tasks[1]);
     }
 
-    //lcd_dprintf("timer end pid %d\n", pid);
     enable_global_interupt();
 }

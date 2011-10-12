@@ -48,15 +48,17 @@
 
 
 typedef struct _thread_struct{
-    long v0, v1, a0, a1, a2, a3;
+    long at;
+    long v0, v1;
+    long a0, a1, a2, a3;
     long t0, t1, t2, t3, t4, t5, t6, t7;
     long s0, s1, s2, s3, s4, s5, s6, s7;
     long t8, t9;
-    long gp, sp, fp, ra; //gp,sp,fp,ra
-
-    unsigned int cp0_epc;
-    unsigned int cp0_status;
-    unsigned int cp0_cause;
+    long k0, k1;
+    long gp, sp, fp, ra;
+    long cp0_status;
+    long cp0_cause;
+    long cp0_epc;
     long ksp;
 }thread_struct;
 
@@ -94,5 +96,7 @@ public:
     void switch_to(thread_struct *prev, thread_struct *cur);
     void freeTask(int pid);
 };
+
+void print(const thread_struct &ts);
 
 #endif
