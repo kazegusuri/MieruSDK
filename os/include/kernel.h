@@ -1,10 +1,6 @@
-/******************************************************************************/
-/* MieruOS: Kernel v0.1                                                       */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-10-20 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +27,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file kmalloc.cpp
+ *@brief memory allocator for kernel.
+ *@author Masahiro Sano
+ *@since 2010/10/20
+ *@date 2011/11/04
+ *@version 0.2
+ */
+
 #pragma once
 
 #define MIERUOS_VERSION "v0.5.6"
@@ -41,6 +45,7 @@
 #define _offsetof(type, member) ((size_t)&((type*)0)->member)
 
 #include <mierulib.h>
+#include <assert.h>
 #include <file.h>
 #include <syscall.h>
 #include <task.h>

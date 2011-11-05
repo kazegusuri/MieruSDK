@@ -1,10 +1,6 @@
-################################################################################
-##  MieruPC Project: Exception Handler v0.2                                    #
-##	written by Masahiro Sano, Arch Lab. Tokyo Tech                  2010-07-16 #
-################################################################################
-
 ##
 ## Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+## Copyright (c) 2011 Masahiro Sano
 ## All rights reserved. 
 ## 
 ## Redistribution and use in source and binary forms, with or without

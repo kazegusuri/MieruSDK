@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano
  * All rights reserved. 
- * Copyright (c) 2011 sabottenda.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,6 +25,14 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*! @file exception.cpp
+ *@brief exceptions handler
+ *@author Masahiro Sano
+ *@since 2010/10/20
+ *@date 2011/11/04
+ *@version 0.1
  */
 
 #include <mierulib.h>

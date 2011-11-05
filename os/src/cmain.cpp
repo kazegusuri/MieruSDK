@@ -1,9 +1,6 @@
-/******************************************************************************
- * MieruOS    Arch Lab. TOKYO TECH                                            *
- ******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +27,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file cmain.cpp
+ *@brief entry point in C
+ *@author Masahiro Sano
+ *@since 2010/06/14
+ *@date 2010/06/14
+ *@version 0.1
+ */
+
 #include <kernel.h>
 
 extern unsigned int start_ctors, end_ctors, start_dtors, end_dtors;
@@ -53,3 +58,20 @@ extern "C" void main(void){
 }
 
 /******************************************************************************/
+extern "C" void __cxa_pure_virtual(){
+    lcd_cls();
+    lcd_dprintf("Inheritance Error\n");
+    lcd_printf("Inheritance Error\n");
+    lcd_printf("This is kernel error.\n");
+    lcd_printf("Please report to a developer\n");
+    for(;;);
+}
+
+/******************************************************************************/
+int  _purecall(){
+    // Do nothing or print an error message.
+    return 0;
+}
+
+/******************************************************************************/
+

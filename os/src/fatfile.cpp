@@ -1,10 +1,6 @@
-/******************************************************************************/
-/* MieruOS: FatFile v0.1                                                      */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-06-14 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +27,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file fatfile.cpp
+ *@brief file operations for fat
+ *@author Masahiro Sano
+ *@since 2010/06/14
+ *@date 2011/11/04
+ */
+
 #include <kernel.h>
 #include <file.h>
 #include <fat.h>
@@ -40,9 +43,9 @@
 /******************************************************************************/
 void convertToStat(FatEntry *fat, Stat *stat){
     char *p;
-    uint cyear, cmon, cday, chour, cmin, csec;
-    uint uyear, umon, uday, uhour, umin, usec;
-    uint ayear, amon, aday;
+    // uint cyear, cmon, cday, chour, cmin, csec;
+    // uint uyear, umon, uday, uhour, umin, usec;
+    // uint ayear, amon, aday;
 
     if (!fat || !stat) return;
 
@@ -66,27 +69,27 @@ void convertToStat(FatEntry *fat, Stat *stat){
 
     *p = 0;
 
-    cyear = (fat->cdate >> 9);
-    cmon  = (fat->cdate >> 5) & 0xf; 
-    cday  = fat->cdate & 0x1f;       
-    chour = fat->ctime >> 11;        
-    cmin  = (fat->ctime >> 5) & 0x3f;
-    csec  = (fat->ctime << 1) & 0x3e;
-    uyear = (fat->udate >> 9);
-    umon  = (fat->udate >> 5) & 0xf; 
-    uday  = fat->udate & 0x1f;       
-    uhour = fat->utime >> 11;        
-    umin  = (fat->utime >> 5) & 0x3f;
-    usec  = (fat->utime << 1) & 0x3e;
-    ayear = (fat->adate >> 9);
-    amon  = (fat->adate >> 5) & 0xf; 
-    aday  = fat->adate & 0x1f;
+    // cyear = (fat->cdate >> 9);
+    // cmon  = (fat->cdate >> 5) & 0xf; 
+    // cday  = fat->cdate & 0x1f;       
+    // chour = fat->ctime >> 11;        
+    // cmin  = (fat->ctime >> 5) & 0x3f;
+    // csec  = (fat->ctime << 1) & 0x3e;
+    // uyear = (fat->udate >> 9);
+    // umon  = (fat->udate >> 5) & 0xf; 
+    // uday  = fat->udate & 0x1f;       
+    // uhour = fat->utime >> 11;        
+    // umin  = (fat->utime >> 5) & 0x3f;
+    // usec  = (fat->utime << 1) & 0x3e;
+    // ayear = (fat->adate >> 9);
+    // amon  = (fat->adate >> 5) & 0xf; 
+    // aday  = fat->adate & 0x1f;
 
     stat->inode = fat->cluster;
     stat->mode  = fat->attr;
-    stat->ctime = 0;
-    stat->atime = 0;
-    stat->utime = 0;
+    stat->ctime = 0; // TODO
+    stat->atime = 0; // TODO
+    stat->utime = 0; // TODO
     stat->size  = fat->size;
 }
 
@@ -540,7 +543,7 @@ int FatFile::read(void *buf, uint count){
 /******************************************************************************/
 int FatFile::readDir(void *buf, uint count){
     uint first, from_sec, offset;
-    int i, remain;
+    int i=0, remain;
     uchar *buffer;
     FatEntry ent;
     FileEntry *p;

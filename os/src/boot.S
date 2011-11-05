@@ -1,5 +1,6 @@
 ##
 ## Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+## Copyright (c) 2011 Masahiro Sano
 ## All rights reserved. 
 ## 
 ## Redistribution and use in source and binary forms, with or without

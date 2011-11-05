@@ -1,10 +1,6 @@
-/******************************************************************************/
-/* MieruOS: Fat v0.1                                                          */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-06-14 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +25,14 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*! @file fat.cpp
+ *@brief file allocation table
+ *@author Masahiro Sano
+ *@since 2010/06/14
+ *@date 2011/11/04
+ *@version 0.1
  */
 
 #include <kernel.h>
@@ -363,7 +367,8 @@ void FatCluster::set(bool isdir, int n){
 
 /******************************************************************************/
 uchar *FatCluster::next(){
-    int size, n, off, sec;
+    int size, off, sec;
+    // int n;
 
     if(sectors <= cur_pos + 1) return NULL;
     cur_pos++;
@@ -376,7 +381,7 @@ uchar *FatCluster::next(){
     }
 
     size = Kernel::getInstance()->fat.clustersize;
-    n = cur_pos / size;
+    //n = cur_pos / size;
     off = cur_pos % size;
 
     // get next cluster if needed

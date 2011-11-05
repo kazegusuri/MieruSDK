@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
- * Copyright (c) 2011 sabottenda.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,8 +29,10 @@
 
 /*! @file exception.h
  *@brief Header file for exception.
- *@author sabottenda
+ *@author Masahiro Sano
+ *@since 2011/10/09
  *@date 2011/10/09
+ *@version 0.1
  */
 
 #pragma once

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
- * All rights reserved. 
  * Copyright (c) 2011 sabottenda.
+ * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,8 +29,9 @@
 
 /*! @file timer.cpp
  *@brief Timer handler.
- *@author sabottenda
+ *@author Masahiro Sano
  *@date 2011/09/23
+ *@date 2011/11/04
  */
 
 #include <mierulib.h>

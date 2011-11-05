@@ -1,10 +1,6 @@
-/******************************************************************************/
-/* MieruOS: Syscall v0.1                                                      */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-06-14 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +27,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file syscall.cpp
+ *@brief syscall implementation
+ *@author Masahiro Sano
+ *@since 2010/06/14
+ *@date 2011/11/04
+ */
+
 #include <kernel.h>
 #include <mierulib.h>
 #include <syscall.h>
@@ -40,7 +43,7 @@
 #include <cache.h>
 #include <exception.h>
 
-#define MAX_STACK_SIZE 4048
+#define MAX_STACK_SIZE 4096
 
 static int (*syscall_table[64])(uint,uint,uint,uint);
 
