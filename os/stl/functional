@@ -1,0 +1,206 @@
+// -*- C++ -*-
+//===------------------------ functional ----------------------------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is dual licensed under the MIT and the University of Illinois Open
+// Source Licenses. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
+#pragma once
+
+
+namespace mpc {
+    template <class _Arg, class _Result>
+    struct unary_function
+    {
+        typedef _Arg    argument_type;
+        typedef _Result result_type;
+    };
+
+    template <class _Arg1, class _Arg2, class _Result>
+    struct binary_function
+    {
+        typedef _Arg1   first_argument_type;
+        typedef _Arg2   second_argument_type;
+        typedef _Result result_type;
+    };
+
+    template <class _Tp> struct hash;
+
+    template <class _Tp>
+    struct __has_result_type
+    {
+    private:
+        struct __two {char _; char __;};
+        template <class _Up> static __two __test(...);
+        template <class _Up> static char __test(typename _Up::result_type* = 0);
+    public:
+        static const bool value = sizeof(__test<_Tp>(0)) == 1;
+    };
+
+    template <class _Tp>
+    struct plus : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x + __y;}
+    };
+
+    template <class _Tp>
+    struct minus : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x - __y;}
+    };
+
+    template <class _Tp>
+    struct multiplies : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x * __y;}
+    };
+
+    template <class _Tp>
+    struct divides : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x / __y;}
+    };
+
+    template <class _Tp>
+    struct modulus : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x % __y;}
+    };
+
+    template <class _Tp>
+    struct negate : unary_function<_Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x) const
+        {return -__x;}
+    };
+
+    template <class _Tp>
+    struct equal_to : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x == __y;}
+    };
+
+    template <class _Tp>
+    struct not_equal_to : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x != __y;}
+    };
+
+    template <class _Tp>
+    struct greater : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x > __y;}
+    };
+
+    template <class _Tp>
+    struct less : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x < __y;}
+    };
+
+    template <class _Tp>
+    struct greater_equal : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x >= __y;}
+    };
+
+    template <class _Tp>
+    struct less_equal : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x <= __y;}
+    };
+
+    template <class _Tp>
+    struct logical_and : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x && __y;}
+    };
+
+    template <class _Tp>
+    struct logical_or : binary_function<_Tp, _Tp, bool>
+    {
+        bool operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x || __y;}
+    };
+
+    template <class _Tp>
+    struct logical_not : unary_function<_Tp, bool>
+    {
+        bool operator()(const _Tp& __x) const
+        {return !__x;}
+    };
+
+    template <class _Tp>
+    struct bit_and : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x & __y;}
+    };
+
+    template <class _Tp>
+    struct bit_or : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x | __y;}
+    };
+
+    template <class _Tp>
+    struct bit_xor : binary_function<_Tp, _Tp, _Tp>
+    {
+        _Tp operator()(const _Tp& __x, const _Tp& __y) const
+        {return __x ^ __y;}
+    };
+
+    template <class _Predicate>
+    class unary_negate
+        : public unary_function<typename _Predicate::argument_type, bool>
+    {
+        _Predicate __pred_;
+    public:
+        explicit unary_negate(const _Predicate& __pred)
+            : __pred_(__pred) {}
+        bool operator()(const typename _Predicate::argument_type& __x) const
+        {return !__pred_(__x);}
+    };
+
+    template <class _Predicate>
+    inline _LIBCPP_INLINE_VISIBILITY
+    unary_negate<_Predicate>
+    not1(const _Predicate& __pred) {return unary_negate<_Predicate>(__pred);}
+
+    template <class _Predicate>
+    class binary_negate
+        : public binary_function<typename _Predicate::first_argument_type,
+                                 typename _Predicate::second_argument_type,
+                                 bool>
+    {
+        _Predicate __pred_;
+    public:
+        explicit binary_negate(const _Predicate& __pred)
+            : __pred_(__pred) {}
+        bool operator()(const typename _Predicate::first_argument_type& __x,
+                                                  const typename _Predicate::second_argument_type& __y) const
+        {return !__pred_(__x, __y);}
+    };
+
+    template <class _Predicate>
+    inline _LIBCPP_INLINE_VISIBILITY
+    binary_negate<_Predicate>
+    not2(const _Predicate& __pred) {return binary_negate<_Predicate>(__pred);}
+
+}

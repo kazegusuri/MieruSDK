@@ -1,0 +1,363 @@
+// -*- C++ -*-
+//===-------------------------- iterator ----------------------------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is dual licensed under the MIT and the University of Illinois Open
+// Source Licenses. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
+#pragma once
+
+#ifndef _NOEXCEPT
+#define _NOEXCEPT
+#define _NOEXCEPT_(x)
+#endif
+
+#include "type_traits"
+#include "iterator_traits"
+
+template<class _Category, class _Tp, class _Distance = ptrdiff_t,
+         class _Pointer = _Tp*, class _Reference = _Tp&>
+struct iterator;
+
+#include "reverse_iterator"
+
+namespace mpc {
+
+    template<class _Category, class _Tp, class _Distance = ptrdiff_t,
+             class _Pointer = _Tp*, class _Reference = _Tp&>
+    struct _LIBCPP_VISIBLE iterator
+    {
+        typedef _Tp        value_type;
+        typedef _Distance  difference_type;
+        typedef _Pointer   pointer;
+        typedef _Reference reference;
+        typedef _Category  iterator_category;
+    };
+
+    template <class _InputIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    void __advance(_InputIter& __i,
+                   typename iterator_traits<_InputIter>::difference_type __n, input_iterator_tag)
+    {
+        for (; __n > 0; --__n)
+            ++__i;
+    }
+
+    template <class _BiDirIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    void __advance(_BiDirIter& __i,
+                   typename iterator_traits<_BiDirIter>::difference_type __n, bidirectional_iterator_tag)
+    {
+        if (__n >= 0)
+            for (; __n > 0; --__n)
+                ++__i;
+        else
+            for (; __n < 0; ++__n)
+                --__i;
+    }
+
+    template <class _RandIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    void __advance(_RandIter& __i,
+                   typename iterator_traits<_RandIter>::difference_type __n, random_access_iterator_tag)
+    {
+        __i += __n;
+    }
+
+    template <class _InputIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    void advance(_InputIter& __i,
+                 typename iterator_traits<_InputIter>::difference_type __n)
+    {
+        __advance(__i, __n, typename iterator_traits<_InputIter>::iterator_category());
+    }
+
+    template <class _InputIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    typename iterator_traits<_InputIter>::difference_type
+    __distance(_InputIter __first, _InputIter __last, input_iterator_tag)
+    {
+        typename iterator_traits<_InputIter>::difference_type __r(0);
+        for (; __first != __last; ++__first)
+            ++__r;
+        return __r;
+    }
+
+    template <class _RandIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    typename iterator_traits<_RandIter>::difference_type
+    __distance(_RandIter __first, _RandIter __last, random_access_iterator_tag)
+    {
+        return __last - __first;
+    }
+
+    template <class _InputIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    typename iterator_traits<_InputIter>::difference_type
+    distance(_InputIter __first, _InputIter __last)
+    {
+        return __distance(__first, __last, typename iterator_traits<_InputIter>::iterator_category());
+    }
+
+    template <class _ForwardIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    _ForwardIter
+    next(_ForwardIter __x,
+         typename iterator_traits<_ForwardIter>::difference_type __n = 1,
+         typename enable_if<__is_forward_iterator<_ForwardIter>::value>::type* = 0)
+    {
+        mpc::advance(__x, __n);
+        return __x;
+    }
+
+    template <class _BidiretionalIter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    _BidiretionalIter
+    prev(_BidiretionalIter __x,
+         typename iterator_traits<_BidiretionalIter>::difference_type __n = 1,
+         typename enable_if<__is_bidirectional_iterator<_BidiretionalIter>::value>::type* = 0)
+    {
+        mpc::advance(__x, -__n);
+        return __x;
+    }
+
+
+
+    // __wrap_iter
+
+    template <class _Iter> class __wrap_iter;
+
+    template <class _Iter1, class _Iter2>
+    bool
+    operator==(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    bool
+    operator<(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    bool
+    operator!=(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    bool
+    operator>(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    bool
+    operator>=(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    bool
+    operator<=(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    typename __wrap_iter<_Iter1>::difference_type
+    operator-(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter>
+    __wrap_iter<_Iter>
+    operator+(typename __wrap_iter<_Iter>::difference_type, __wrap_iter<_Iter>) _NOEXCEPT;
+
+    template <class _I, class _O> _O copy(_I, _I, _O);
+    template <class _B1, class _B2> _B2 copy_backward(_B1, _B1, _B2);
+    template <class _I, class _O> _O move(_I, _I, _O);
+    template <class _B1, class _B2> _B2 move_backward(_B1, _B1, _B2);
+
+    template <class _Tp>
+    typename enable_if
+    <
+        is_trivially_copy_assignable<_Tp>::value,
+        _Tp*
+        >::type
+        __unwrap_iter(__wrap_iter<_Tp*>);
+
+template <class _Iter>
+class __wrap_iter
+{
+public:
+    typedef _Iter                                                      iterator_type;
+    typedef typename iterator_traits<iterator_type>::iterator_category iterator_category;
+    typedef typename iterator_traits<iterator_type>::value_type        value_type;
+    typedef typename iterator_traits<iterator_type>::difference_type   difference_type;
+    typedef typename iterator_traits<iterator_type>::pointer           pointer;
+    typedef typename iterator_traits<iterator_type>::reference         reference;
+private:
+    iterator_type __i;
+public:
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter() _NOEXCEPT
+        {
+        }
+    template <class _Up> _LIBCPP_INLINE_VISIBILITY __wrap_iter(const __wrap_iter<_Up>& __u,
+                                                               typename enable_if<is_convertible<_Up, iterator_type>::value>::type* = 0) _NOEXCEPT
+        : __i(__u.base())
+        {
+        }
+    _LIBCPP_INLINE_VISIBILITY reference operator*() const _NOEXCEPT
+        {
+            return *__i;
+        }
+    _LIBCPP_INLINE_VISIBILITY pointer  operator->() const _NOEXCEPT {return &(operator*());}
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter& operator++() _NOEXCEPT
+        {
+            ++__i;
+            return *this;
+        }
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter  operator++(int) _NOEXCEPT
+        {__wrap_iter __tmp(*this); ++(*this); return __tmp;}
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter& operator--() _NOEXCEPT
+        {
+            --__i;
+            return *this;
+        }
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter  operator--(int) _NOEXCEPT
+        {__wrap_iter __tmp(*this); --(*this); return __tmp;}
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter  operator+ (difference_type __n) const _NOEXCEPT
+        {__wrap_iter __w(*this); __w += __n; return __w;}
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter& operator+=(difference_type __n) _NOEXCEPT
+        {
+            __i += __n;
+            return *this;
+        }
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter  operator- (difference_type __n) const _NOEXCEPT
+        {return *this + (-__n);}
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter& operator-=(difference_type __n) _NOEXCEPT
+        {*this += -__n; return *this;}
+    _LIBCPP_INLINE_VISIBILITY reference        operator[](difference_type __n) const _NOEXCEPT
+        {
+            return __i[__n];
+        }
+
+    _LIBCPP_INLINE_VISIBILITY iterator_type base() const _NOEXCEPT {return __i;}
+
+private:
+    _LIBCPP_INLINE_VISIBILITY __wrap_iter(iterator_type __x) _NOEXCEPT : __i(__x) {}
+
+    template <class _Up> friend class __wrap_iter;
+    template <class _CharT, class _Traits, class _Alloc> friend class basic_string;
+    template <class _Tp, class _Alloc> friend class vector;
+
+    template <class _Iter1, class _Iter2>
+    friend
+    bool
+    operator==(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    friend
+    bool
+    operator<(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    friend
+    bool
+    operator!=(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    friend
+    bool
+    operator>(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    friend
+    bool
+    operator>=(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    friend
+    bool
+    operator<=(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1, class _Iter2>
+    friend
+    typename __wrap_iter<_Iter1>::difference_type
+    operator-(const __wrap_iter<_Iter1>&, const __wrap_iter<_Iter2>&) _NOEXCEPT;
+
+    template <class _Iter1>
+    friend
+    __wrap_iter<_Iter1>
+    operator+(typename __wrap_iter<_Iter1>::difference_type, __wrap_iter<_Iter1>) _NOEXCEPT;
+
+    template <class _I, class _O> friend _O copy(_I, _I, _O);
+    template <class _B1, class _B2> friend _B2 copy_backward(_B1, _B1, _B2);
+    template <class _I, class _O> friend _O move(_I, _I, _O);
+    template <class _B1, class _B2> friend _B2 move_backward(_B1, _B1, _B2);
+
+    template <class _Tp>
+    friend
+    typename enable_if
+    <
+        is_trivially_copy_assignable<_Tp>::value,
+        _Tp*
+        >::type
+        __unwrap_iter(__wrap_iter<_Tp*>);
+};
+
+    template <class _Iter1, class _Iter2>
+    inline _LIBCPP_INLINE_VISIBILITY
+    bool
+    operator==(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter2>& __y) _NOEXCEPT
+    {
+        return __x.base() == __y.base();
+    }
+
+    template <class _Iter1, class _Iter2>
+    inline _LIBCPP_INLINE_VISIBILITY
+    bool
+    operator<(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter2>& __y) _NOEXCEPT
+    {
+        return __x.base() < __y.base();
+    }
+
+    template <class _Iter1, class _Iter2>
+    inline _LIBCPP_INLINE_VISIBILITY
+    bool
+    operator!=(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter2>& __y) _NOEXCEPT
+    {
+        return !(__x == __y);
+    }
+
+    template <class _Iter1, class _Iter2>
+    inline _LIBCPP_INLINE_VISIBILITY
+    bool
+    operator>(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter2>& __y) _NOEXCEPT
+    {
+        return __y < __x;
+    }
+
+    template <class _Iter1, class _Iter2>
+    inline _LIBCPP_INLINE_VISIBILITY
+    bool
+    operator>=(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter2>& __y) _NOEXCEPT
+    {
+        return !(__x < __y);
+    }
+
+    template <class _Iter1, class _Iter2>
+    inline _LIBCPP_INLINE_VISIBILITY
+    bool
+    operator<=(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter2>& __y) _NOEXCEPT
+    {
+        return !(__y < __x);
+    }
+
+    template <class _Iter1, class _Iter2>
+    inline _LIBCPP_INLINE_VISIBILITY
+    typename __wrap_iter<_Iter1>::difference_type
+    operator-(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter2>& __y) _NOEXCEPT
+    {
+        return __x.base() - __y.base();
+    }
+
+    template <class _Iter>
+    inline _LIBCPP_INLINE_VISIBILITY
+    __wrap_iter<_Iter>
+    operator+(typename __wrap_iter<_Iter>::difference_type __n,
+              __wrap_iter<_Iter> __x) _NOEXCEPT
+    {
+        __x += __n;
+        return __x;
+    }
+};
