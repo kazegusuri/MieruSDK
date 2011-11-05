@@ -1,10 +1,6 @@
-/******************************************************************************/
-/* MieruOS: New v0.1                                                          */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-06-14 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +27,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file new.h
+ *@brief Header file for new/delete method
+ *@author Masahiro Sano
+ *@since 2010/06/24
+ *@date 2010/06/24
+ */
+
 #pragma once
 #include <types.h>
 
-// void *operator new(size_t size);
-// void operator delete(void *address);
-// void *operator new[[](size_t size);
-// void operator delete[]void *address);
+void *operator new(size_t size);
+void operator delete(void *address);
+void *operator new[](size_t size);
+void operator delete[](void *address);
 void* operator new(size_t size __UNUSED__, void *address);

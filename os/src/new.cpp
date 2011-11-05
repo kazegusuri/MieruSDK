@@ -1,10 +1,6 @@
-/******************************************************************************/
-/* MieruOS: New v0.1                                                          */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-06-14 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,39 +27,40 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file new.cpp
+ *@brief new operator
+ *@author Masahiro Sano
+ *@since 2010/06/14
+ *@date 2011/11/04
+ */
+
 #include <new.h>
+#include <kmalloc.h>
 
 /******************************************************************************/
-// void* operator new(size_t size)
-// {
-//     void* p = mpc_malloc(size);
-//     return p;
-// }
+void *operator new(size_t size) {
+    return MemoryAllocator::getInstance()->alloc(size);
+}
 
 /******************************************************************************/
-// void operator delete(void* address)
-// {
-//     mpc_free(address);
-//     return;
-// }
+void operator delete(void* address) {
+    MemoryAllocator::getInstance()->free(address);
+    return;
+}
 
 /******************************************************************************/
-// void* operator new[](size_t size)
-// {
-//     void* p = mpc_malloc(size);
-//     return p;
-// }
+void *operator new[](size_t size) {
+    return MemoryAllocator::getInstance()->alloc(size);
+}
 
 /******************************************************************************/
-// void operator delete[](void* address)
-// {
-//     mpc_free(address);
-//     return;
-// }
+void operator delete[](void* address) {
+    MemoryAllocator::getInstance()->free(address);
+    return;
+}
 
 /******************************************************************************/
-void* operator new(size_t size __UNUSED__, void *address)
-{
+void *operator new(size_t size __UNUSED__, void *address) {
     return address;
 }
  
