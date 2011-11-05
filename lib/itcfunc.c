@@ -93,7 +93,7 @@ void lcd_reset(void)
 {
     int i;
     for(i = 0; i < 256; i++){
-        lcd_setpalette(i, 
+        lcd_setpalette(i,
                        ((i & 0xe0)     ) | ((i & 0x80) >> 3),
                        ((i & 0x1c) << 3) | ((i & 0x10)     ),
                        ((i & 0x03) << 6) | ((i & 0x03) << 4));

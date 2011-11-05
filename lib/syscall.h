@@ -88,6 +88,7 @@ int _syscall(unsigned int syscall_nr,
 #define SYSCALL_LSEEK     15 ///< sys_lseekのシステムコール番号
 #define SYSCALL_BRK       16 ///< sys_brkのシステムコール番号
 #define SYSCALL_MKDIR     17 ///< sys_mkdirのシステムコール番号
+#define SYSCALL_ABORT   4001 ///< sys_mkdirのシステムコール番号
 
 
 #define SEEK_SET	0 ///< sys_lseekで使用:ファイルの先頭からのオフセット

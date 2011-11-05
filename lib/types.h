@@ -40,11 +40,6 @@
 
 #define __UNUSED__ __attribute__ ((unused))
 #define __UNUSED_VARIABLE(x) (void)(x)
-#define NULL  0
-#define TRUE  1
-#define FALSE 0
-
-#define EOF (-1)
 
 typedef char __s8;             ///< 符号付き8bit:charの別名
 typedef unsigned char __u8;    ///< 符号無し8bit:unsigned charの別名
@@ -54,6 +49,7 @@ typedef unsigned short __u16;  ///< 符号無し16bit:unsigned shortの別名
 
 typedef int __s32;             ///< 符号付き32bit:intの別名
 typedef unsigned int __u32;    ///< 符号無し32bit:unsigned intの別名
+
 
 typedef __s8 int8;             ///< 符号付き8bit
 typedef __u8 uint8;            ///< 符号無し16bit
@@ -66,8 +62,18 @@ typedef unsigned char uchar;   ///< unsigned charの別名
 typedef unsigned short ushort; ///< unsigned shortの別名
 typedef unsigned int uint;     ///< unsigned intの別名
 
+
+#ifndef NULL
+  #define NULL  0
+#endif
+#ifndef EOF
+  #define EOF (-1)
+#endif
+
 typedef uint size_t;           ///< unsigned intの別名
 typedef uint time_t;           ///< unsigned intの別名
+typedef int ptrdiff_t;
+
 
 #ifndef va_arg
 typedef char *va_list;         ///< 可変長引数を扱う型

@@ -92,6 +92,11 @@ int sys_fin(const struct task_report *repo){
 }
 
 /**********************************************************************/
+int sys_abort(int status){
+    return _syscall(SYSCALL_ABORT, status, 0, 0, 0);
+}
+
+/**********************************************************************/
 int sys_exit(int status){
     struct task_report report;
     report.disp = lcd_getdisplay();
