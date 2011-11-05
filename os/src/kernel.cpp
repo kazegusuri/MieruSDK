@@ -1,10 +1,6 @@
-/******************************************************************************/
-/* MieruOS: Kernel v0.1                                                       */
-/* written by Masahiro Sano Arch Lab. Tokyo Tech                   2010-06-14 */
-/******************************************************************************/
-
 /*
  * Copyright (c) 2010 Arch Lab. Tokyo Institute of Technology.
+ * Copyright (c) 2011 Masahiro Sano.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +27,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*! @file kmalloc.cpp
+ *@brief memory allocator for kernel.
+ *@author Masahiro Sano
+ *@since 2010/10/20
+ *@date 2011/11/04
+ *@version 0.2
+ */
+
 #include <kernel.h>
 #include <mierulib.h>
 #include <syscall.h>
@@ -40,32 +44,15 @@
 #include <cache.h>
 #include <timer.h>
 #include <exception.h>
+#include <kmalloc.h>
+#include <test.h>
 
-extern void sh_mainloop();
-char kernel_buffer[sizeof(Kernel)];
 Kernel *Kernel::_instance = NULL;
-
-void process1();
-void process2();
-
-/******************************************************************************/
-extern "C" void __cxa_pure_virtual(){
-    lcd_cls();
-    lcd_dprintf("Inheritance Error\n");
-    lcd_printf("Inheritance Error\n");
-    lcd_printf("This is kernel error.\n");
-    lcd_printf("Please report to a developer\n");
-    for(;;);
-}
-
-/******************************************************************************/
-int  _purecall(){
-    // Do nothing or print an error message.
-    return 0;
-}
+extern void sandbox();
 
 /******************************************************************************/
 void startKernel(void){
+    TEST_CLASS_CALL(MemoryAllocator);
     Kernel *kernel = Kernel::getInstance();
     kernel->init();
     kernel->start();
@@ -73,13 +60,12 @@ void startKernel(void){
 
 /******************************************************************************/
 Kernel::Kernel(){
-    // lcd_dprintf("hoge----------------------\n");
 }
 
 /******************************************************************************/
 Kernel *Kernel::getInstance() {
     if (_instance == NULL) {
-        _instance = new(kernel_buffer) Kernel();
+        _instance = new Kernel();
     }
     return _instance;
 }
@@ -92,7 +78,7 @@ void Kernel::init(){
     lcd_ttyopen(1);
 
     init_syscall();
-    init_timer();
+    //init_timer();
     init_exception();
     clear_kernel_mode();
     enable_global_interupt();
@@ -118,11 +104,6 @@ void Kernel::init(){
 
     taskmanager.init();
     init_cache();
-
-    extern uint __stack_end[]; // defined by linker
-    extern uint __stack_start[]; // defined by linker
-    lcd_dprintf("stack_end:%08x\n", __stack_end);
-    lcd_dprintf("stack_start:%08x\n", __stack_start);
 }
 
 /******************************************************************************/
@@ -140,83 +121,13 @@ void Kernel::message(){
 
 /******************************************************************************/
 void Kernel::start(){
-    Task *current = taskmanager.getCurrentTask();
-    unsigned int gp;
-    
-    //ret = system::_syscall(0,104,111,1200,0xffff);
-    //lcd_dprintf("ret %d\n", ret);
-    //for(;;);
+    TEST_CLASS_CALL(list);
+    sandbox();
 
-    Task *t1 = taskmanager.getTask();
-    Task *t2 = taskmanager.getTask();
-
-    uint sp1 = 0x50000 - 16;
-    uint sp2 = 0x80000 - 16;
-
-    // __asm__ volatile ("move %0, $gp;" : "=r" (gp));
-    // lcd_dprintf("%d %d %08x\n", t1->pid, t2->pid, gp);
-
-    t1->tss.sp = sp1;
-    //t1->tss.gp = gp;
-    t1->tss.ra = (uint)process1;
-    t1->tss.cp0_status = 1;
-    t1->tss.cp0_epc = 0;
-    t1->tss.cp0_cause = 0;
-    t1->stack_start = sp1;
-    t1->stack_end   = 0x20000 + 16;
-    t1->brk         = 0x20000 + 16;
-
-    lcd_dprintf("%08x \n", t1->tss.ra);
-
-    t2->tss.sp = sp2;
-    //t2->tss.gp = gp;
-    t2->tss.ra = (uint)process2;
-    t2->tss.cp0_status = 1;
-    t2->tss.cp0_epc = 0;
-    t2->tss.cp0_cause = 0;
-    t2->stack_start = sp2;
-    t2->stack_end   = sp1+32;
-    t2->brk         = sp1+32;
-
-    invalidate_icache();
-    invalidate_dcache();
-
-    lcd_dprintf("start!!!\n");
-    //taskmanager.switchContext(current, t1);
-
-
-    for(;;);
-    // Shell sh;
-    // message();
-    // sh.run();
+    Shell *sh = new Shell();
+    message();
+    sh->run();
+    delete sh;
 }
 
 /******************************************************************************/
-
-void process1(){
-    for(;;){
-        lcd_dprintf("process1\n");
-        usleep(100000);
-    }
-
-    Kernel::getInstance()->taskmanager.switchContext(
-        Kernel::getInstance()->taskmanager.getCurrentTask(), 
-        &Kernel::getInstance()->taskmanager.tasks[2]);
-    lcd_dprintf("process1\n");
-    for(;;);
-}
-
-void process2(){
-    for(;;){
-        lcd_dprintf("process2\n");
-        usleep(100000);
-    }
-    lcd_dprintf("process2\n");
-    //usleep(1000000);
-    Kernel::getInstance()->taskmanager.switchContext(
-        Kernel::getInstance()->taskmanager.getCurrentTask(), 
-        &Kernel::getInstance()->taskmanager.tasks[1]);
-    lcd_dprintf("process2\n");
-
-    for(;;);
-}
