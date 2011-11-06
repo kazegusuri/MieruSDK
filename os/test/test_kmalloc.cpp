@@ -53,11 +53,6 @@ void test_class_MemoryAllocator() {
     TEST_TRUE(((uint)p0 & 3) == 0);
     current = _this->head;
     TEST_NOT_NULL(current);
-    for (int i=0;i<100;i++) {
-        if (current->next() == NULL) break;
-        current = current->next();
-    }
-    TEST_NOT_NULL(current);
     TEST_TRUE(current->data() == p0);
     mcb0 = _this->getBlock(p0);
     TEST_IS_NULL(mcb0->next());
@@ -70,10 +65,8 @@ void test_class_MemoryAllocator() {
     TEST_NOT_NULL(p1);
     TEST_TRUE(((uint)p1 & 3) == 0);
     current = _this->head;
-    for (int i=0;i<100;i++) {
-        if (current->next() == NULL) break;
-        current = current->next();
-    }
+    TEST_TRUE(current->data() == p0);
+    current = current->next();
     TEST_NOT_NULL(current);
     TEST_TRUE(current->data() == p1);
     mcb1 = _this->getBlock(p1);
@@ -82,15 +75,14 @@ void test_class_MemoryAllocator() {
     TEST_TRUE(mcb1->getSize() == 128 + mcb_size);
     TEST_FALSE(mcb1->isAvailable() );
     TEST_TRUE(mcb0->next() == mcb1);
+    TEST_FALSE(mcb0->isAvailable());
 
     // test #3: just free
     mcb1 = _this->getBlock(p1);
     _this->free(p1);
     current = _this->head;
-    for (int i=0;i<100;i++) {
-        if (current->next() == NULL) break;
-        current = current->next();
-    }
+    TEST_TRUE(current->data() == p0);
+    current = current->next();
     TEST_NOT_NULL(current);
     TEST_TRUE(current->data() == p1);
     TEST_IS_NULL(mcb1->next());
@@ -98,12 +90,15 @@ void test_class_MemoryAllocator() {
     TEST_TRUE(mcb1->getSize() == 128  + mcb_size);
     TEST_TRUE(mcb1->isAvailable());
     TEST_TRUE(mcb0->next() == mcb1);
+    TEST_FALSE(mcb0->isAvailable());
 
     // test #4: free and merge next
     mcb0 = _this->getBlock(p0);
     _this->free(p0);
     current = _this->head;
     TEST_NOT_NULL(current);
+    TEST_TRUE(current->data() == p0);
+    TEST_TRUE(current == mcb0);
     TEST_IS_NULL(current->next());
     TEST_TRUE(current->getSize() == (64 + 128 + 2*mcb_size));
     TEST_TRUE(current->isAvailable());
@@ -117,10 +112,8 @@ void test_class_MemoryAllocator() {
     TEST_NOT_NULL(p1);
     TEST_TRUE(((uint)p1 & 3) == 0);
     current = _this->head;
-    for (int i=0;i<100;i++) {
-        if (current->next() == NULL) break;
-        current = current->next();
-    }
+    TEST_NOT_NULL(current);
+    current = current->next();
     TEST_NOT_NULL(current);
     TEST_TRUE(current->data() == p1);
     mcb1 = _this->getBlock(p1);
@@ -170,6 +163,7 @@ void test_class_MemoryAllocator() {
     TEST_TRUE(current->getSize() == (192 + 256 + 3*mcb_size));
     TEST_IS_NULL(current->next());
     TEST_TRUE(current->prev() == mcb0);
+    TEST_TRUE(current->isAvailable());
     // lcd_dprintf("mcb0   :%p size:%d use:%d next:%p prev:%p\n", 
     //             mcb0, mcb0->getSize(), mcb0->isAvailable(),
     //             mcb0->next(), mcb0->prev());

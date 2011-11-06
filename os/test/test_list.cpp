@@ -41,6 +41,7 @@
 #ifdef TEST_MODE
 
 void test_class_list(void) {
+    
     if(1){
         mpc::list<int>::iterator it;
         int i;
@@ -61,8 +62,7 @@ void test_class_list(void) {
         TEST_TRUE(d.size() == 5);
         for (it = d.begin(), i = 1; it != d.end(); ++it, ++i) {
             TEST_TRUE(*it == i);
-        }
-
+        }               
         mpc::list<int> e(d);
         TEST_TRUE(e.size() == 5);
         for (it = e.begin(), i = 1; it != e.end(); ++it, ++i) {
