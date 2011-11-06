@@ -35,13 +35,13 @@
  */
 
 #pragma once
+
+#ifdef TEST_MODE
 #include <assert.h>
 #include <mierulib.h>
 
 void test_class_MemoryAllocator();
 void test_class_list();
-
-#ifdef TEST_MODE
 
 void _TEST_TRUE(bool x, const char *varx, const char *fname, int line);
 void _TEST_FALSE(bool x, const char *varx, const char *fname, int line);
