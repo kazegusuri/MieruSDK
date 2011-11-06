@@ -4,8 +4,7 @@
  *  Dual licensed under New BSD or GPL v2 licenses.                   *
  *  See COPYING file on the base directory for more information.      *
  **********************************************************************/
-#include "../core/define.h"
-#include "../common/ttyc.h"
+#include "define.h"
 #define L_NAME_MP "MieruPC Extension"
 #define L_VER_MP  "2010-07-31"
 

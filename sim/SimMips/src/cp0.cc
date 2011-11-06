@@ -4,7 +4,7 @@
  *  Dual licensed under New BSD or GPL v2 licenses.                   *
  *  See COPYING file on the base directory for more information.      *
  **********************************************************************/
-#include "define.h"
+#include "define2.h"
 
 #define READBITS(reg, pos) ((readreg(reg) >> pos ## _SH) & pos ## _MASK)
 #define MODIFYBITS(reg, pos, code) modifyreg(reg, (code) << pos ## _SH,\

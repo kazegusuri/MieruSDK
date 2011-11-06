@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "ttyc.h"
 
 /**********************************************************************/
 typedef unsigned int uint;
@@ -480,6 +481,14 @@ enum {
     BRANCH               = 0x1000000,
     BRANCH_LIKELY        = 0x2000000,
     BRANCH_NODELAY       = 0x4000000,
+};
+
+/* System Call Definition *********************************************/
+/**********************************************************************/
+enum {
+    SYS_EXIT  = 4001,
+    SYS_WRITE = 4004,
+    SYS_IOCTL = 4054,
 };
 
 /**********************************************************************/

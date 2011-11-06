@@ -4,7 +4,7 @@
  *  Dual licensed under New BSD or GPL v2 licenses.                   *
  *  See COPYING file on the base directory for more information.      *
  **********************************************************************/
-#include "define.h"
+#include "define2.h"
 
 /**********************************************************************/
 int main(int argc, char *argv[])
