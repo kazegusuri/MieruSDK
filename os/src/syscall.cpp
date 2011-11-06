@@ -149,7 +149,7 @@ int sys_init(struct task_report *repo){
 
 /******************************************************************************/
 int sys_fin(const struct task_report *repo){
-    Kernel::getInstance()->taskmanager.current->report = *repo;
+    Kernel::getInstance()->taskmanager.getCurrentTask()->report = *repo;
     lcd_setdisplay(repo->disp);
     return 0;
 }

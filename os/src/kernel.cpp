@@ -54,6 +54,7 @@ extern void sandbox();
 void startKernel(void){
     TEST_CLASS_CALL(MemoryAllocator);
     Kernel *kernel = Kernel::getInstance();
+    lcd_dprintf("Kernel:%p end:%x\n", kernel, kernel+1);
     kernel->init();
     kernel->start();
 }

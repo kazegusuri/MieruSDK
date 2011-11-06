@@ -38,13 +38,7 @@
 #pragma once
 #include <syscall.h>
 #include <mierulib.h>
-
-#define TASK_STATE_NOALLOC   0x00
-#define TASK_STATE_ALLOC     0x01
-#define TASK_STATE_RUNNING   0x02
-#define TASK_STATE_WAITING   0x04
-#define TASK_STATE_STOP      0x20
-
+#include <list.hpp>
 
 #ifndef __ASSEMBLY__
 
@@ -68,6 +62,12 @@ typedef struct _thread_struct{
 
 class Task{
 public:
+    const static int TASK_STATE_NOALLOC   = 0x00;
+    const static int TASK_STATE_ALLOC     = 0x01;
+    const static int TASK_STATE_RUNNING   = 0x02;
+    const static int TASK_STATE_WAITING   = 0x04;
+    const static int TASK_STATE_STOP      = 0x20;
+    
     int state;
     int pid;
     int stack_start;
@@ -84,23 +84,30 @@ public:
 
 
 class TaskManager{
-public:
-    int remain;
-    Task tasks[MAX_TASK_NUM];
     Task *current;
     Task *previous;
+    unsigned int max_pid;
+    mpc::list<Task *> tasks;
+    mpc::list<Task *> running;
+
+    void switch_to(thread_struct *prev, thread_struct *cur);
+public:
 
     TaskManager();
     void init();
     Task *getTask();
+    bool freeTask(int pid);
+    Task *findTask(int pid);
+    bool startTask(Task *task);
+    bool stopTask(Task *task);
     Task *getCurrentTask();
     Task *getPreviousTask();
     Task *getKernelTask();
+    void switchContext();
     void switchContext(Task *prev, Task *cur);
-    void switch_to(thread_struct *prev, thread_struct *cur);
-    void freeTask(int pid);
 };
 
 void print(const thread_struct &ts);
+void print(const Task &task);
 
 #endif

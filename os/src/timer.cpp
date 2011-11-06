@@ -55,8 +55,8 @@ void init_timer(){
 void timer_handler(){
     disable_global_interupt();
     update_timer(0x100);
-    int pid = Kernel::getInstance()->taskmanager.getCurrentTask()->pid;
-
+    //int pid = Kernel::getInstance()->taskmanager.getCurrentTask()->pid;
+    /*
     if(pid == 0){
         Kernel::getInstance()->taskmanager.switchContext(
             Kernel::getInstance()->taskmanager.getCurrentTask(), 
@@ -72,6 +72,6 @@ void timer_handler(){
             Kernel::getInstance()->taskmanager.getCurrentTask(), 
             &Kernel::getInstance()->taskmanager.tasks[1]);
     }
-
+    */
     enable_global_interupt();
 }

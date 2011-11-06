@@ -42,53 +42,74 @@
 #include <initializer_list>
 
 void process1(){
+    lcd_dprintf("process1 start\n");
+    int loop = 0;
     for(;;){
-        lcd_dprintf("process1\n");
-        usleep(100000);
-    }
+        for(int i=0;i<10;i++){
+            lcd_dprintf("process1\n");
+            usleep(200000);
+        }
 
-    Kernel::getInstance()->taskmanager.switchContext(
-        Kernel::getInstance()->taskmanager.getCurrentTask(), 
-        &Kernel::getInstance()->taskmanager.tasks[2]);
-    lcd_dprintf("process1\n");
+        Kernel::getInstance()->taskmanager.switchContext();
+        lcd_dprintf("process1 restart!!\n");
+
+        if(loop % 4 == 1){
+            lcd_dprintf("STOP PROC 2\n");
+            TaskManager &man = Kernel::getInstance()->taskmanager;
+            Task *t = man.findTask(2);
+            assert(t != NULL);
+            man.stopTask(t);
+        }
+
+        if(loop % 4 == 3){
+            lcd_dprintf("RESTART PROC 2\n");
+            TaskManager &man = Kernel::getInstance()->taskmanager;
+            Task *t = man.findTask(2);
+            assert(t != NULL);
+            man.startTask(t);
+        }
+
+        loop++;
+    }
     for(;;);
 }
 
 void process2(){
+    lcd_dprintf("process1 start\n");
+    int loop = 0;
     for(;;){
-        lcd_dprintf("process2\n");
-        usleep(100000);
-    }
-    lcd_dprintf("process2\n");
-    //usleep(1000000);
-    Kernel::getInstance()->taskmanager.switchContext(
-        Kernel::getInstance()->taskmanager.getCurrentTask(), 
-        &Kernel::getInstance()->taskmanager.tasks[1]);
-    lcd_dprintf("process2\n");
+        for(int i=0;i<10;i++){
+            lcd_dprintf("process2\n");
+            usleep(200000);
+        }
+        Kernel::getInstance()->taskmanager.switchContext();
+        lcd_dprintf("process2 restart!!\n");
 
+        if(loop % 4 == 1){
+            lcd_dprintf("STOP PROC 1\n");
+            TaskManager &man = Kernel::getInstance()->taskmanager;
+            Task *t = man.findTask(1);
+            assert(t != NULL);
+            man.stopTask(t);
+        }
+
+        if(loop % 4 == 3){
+            lcd_dprintf("RESTART PROC 1\n");
+            TaskManager &man = Kernel::getInstance()->taskmanager;
+            Task *t = man.findTask(1);
+            assert(t != NULL);
+            man.startTask(t);
+        }
+
+        loop++;
+    }
     for(;;);
 }
 
 void sandbox() {
 
-    lcd_dprintf("aaa\n");
-    mpc::list<int> a = {1, 2, 3, 4};
-    for(auto it = a.begin(); it != a.end(); it++) {
-        lcd_dprintf("%d ", *it);
-    }
-    lcd_dprintf("\n");
-
-    for(;;);
     Kernel *kernel = Kernel::getInstance();
-    // Task *current = kernel->taskmanager.getCurrentTask();
-    // unsigned int gp;
-
-    //MemoryAllocator::getInstance()->_unitTest();
-    //for(;;);
-    
-    //ret = system::_syscall(0,104,111,1200,0xffff);
-    //lcd_dprintf("ret %d\n", ret);
-    //for(;;);
+    TaskManager &manager = kernel->taskmanager;
 
     Task *t1 = kernel->taskmanager.getTask();
     Task *t2 = kernel->taskmanager.getTask();
@@ -108,8 +129,9 @@ void sandbox() {
     t1->stack_start = sp1;
     t1->stack_end   = 0x20000 + 16;
     t1->brk         = 0x20000 + 16;
+    lcd_dprintf("t1: pid:%d \n", t1->pid);
+    manager.startTask(t1);
 
-    lcd_dprintf("%08x \n", t1->tss.ra);
 
     t2->tss.sp = sp2;
     //t2->tss.gp = gp;
@@ -120,10 +142,19 @@ void sandbox() {
     t2->stack_start = sp2;
     t2->stack_end   = sp1+32;
     t2->brk         = sp1+32;
+    lcd_dprintf("t2: pid:%d \n", t2->pid);
+    manager.startTask(t2);
+
 
     invalidate_icache();
     invalidate_dcache();
 
     lcd_dprintf("start!!!\n");
-    //taskmanager.switchContext(current, t1);
+
+    // print(*t1);
+    // print(*t2);
+    manager.switchContext();
+    //kernel->taskmanager.switchContext(kernel->taskmanager.getCurrentTask(), t1);
+
+    for(;;);
 }

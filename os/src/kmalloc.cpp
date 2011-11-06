@@ -84,9 +84,10 @@ void *MemoryAllocator::sbrk(const uint req_size) {
         return NULL;
     }
 
+    void *ret = (void *)this->brk;
     this->brk = next;
     this->stack_end = next;
-    return (void *)this->brk;
+    return ret;
 }
 
 /**********************************************************************/
@@ -116,6 +117,7 @@ void *MemoryAllocator::alloc(uint req_size){
         if (current->getSize() > alloc_size + min_size) {
             current->split(alloc_size);
         }
+
         return current->data();
     }
 
@@ -138,6 +140,7 @@ void *MemoryAllocator::alloc(uint req_size){
         prev->connect(next);
         next->connect(NULL);
     }
+
     return next->data();
 }
 

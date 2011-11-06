@@ -39,35 +39,27 @@
 #include <task.h>
 
 /******************************************************************************/
-TaskManager::TaskManager(){
+TaskManager::TaskManager() :
+    max_pid(0)
+{
 }
 
 /******************************************************************************/
 void TaskManager::init(){
-    remain = MAX_TASK_NUM;
+    max_pid = 0;
     current = getTask();
     previous = NULL;
 }
 
 /******************************************************************************/
 Task *TaskManager::getTask(){
-    Task *p;
-    if(remain == 0)
-        return NULL;
+    Task *p = new Task();
+    tasks.push_back(p);
+    p->state = Task::TASK_STATE_STOP;
 
-    for(int i=0;i<MAX_TASK_NUM;i++){
-        p = &tasks[i];
-        if(p->state != TASK_STATE_NOALLOC)
-            continue;
-
-        p->state = TASK_STATE_ALLOC;
-        p->pid = i;
-        
-        remain--;
-        return p;
-    }
-            
-    return NULL;
+    // TODO: need atomic op
+    p->pid = max_pid++;
+    return p;
 }
 
 /******************************************************************************/
@@ -82,27 +74,79 @@ Task *TaskManager::getPreviousTask(){
 
 /******************************************************************************/
 Task *TaskManager::getKernelTask(){
-    return &tasks[0];
+    //return &tasks[0];
+    return tasks.front();
 }
 
 /******************************************************************************/
-void TaskManager::freeTask(int pid){
-    if(pid == 0) return;
+Task *TaskManager::findTask(int pid){
+    for (auto it = tasks.begin(); it != tasks.end(); ++it) {
+        if ((*it)->pid == pid) return *it;
+    }
 
-    if(pid < 0 && pid >= MAX_TASK_NUM)
-        return;
-
-    Task *p = &tasks[pid];
-    p->state = TASK_STATE_NOALLOC;
-    remain++;
+    return NULL;
 }
 
 /******************************************************************************/
-// doesn't work
-void TaskManager::switchContext(Task *prev, Task *cur){
-    current = cur;
-    previous = prev;
-    switch_to(&prev->tss, &cur->tss);
+bool TaskManager::freeTask(int pid){
+    if(pid == 0) return false;
+    
+    for (auto it = tasks.begin();  it != tasks.end(); ++it) {
+        if((*it)->pid != pid) continue;
+
+        tasks.erase(it);
+        assert((*it)->pid == Task::TASK_STATE_STOP);
+        delete *it;
+        return true;
+    }
+
+    return false;
+}
+
+/******************************************************************************/
+bool TaskManager::startTask(Task *task){
+    if (task == NULL || task->state == Task::TASK_STATE_RUNNING) {
+        return false;
+    }
+
+    task->state = Task::TASK_STATE_RUNNING;
+    running.push_back(task);
+    return true;
+}
+
+/******************************************************************************/
+bool TaskManager::stopTask(Task *task){
+    if (task == NULL || task->state != Task::TASK_STATE_RUNNING) {
+        return false;
+    }
+
+    for (auto it = running.begin(); it != running.end(); ++it) {
+        if ((*it)->pid != task->pid) continue;
+
+        running.erase(it);
+        task->state = Task::TASK_STATE_STOP;
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************************/
+void TaskManager::switchContext(){
+    assert(!running.empty());
+    Task *p = running.front();
+    running.pop_front();
+    running.push_back(p);
+    // lcd_dprintf("SwitchContext()\n");
+    // print(*p);
+    switchContext(getCurrentTask(), p);
+}
+
+
+/******************************************************************************/
+void TaskManager::switchContext(Task *cur, Task *next){
+    current = next;
+    previous = cur;
+    switch_to(&cur->tss, &next->tss);
 }
 
 /******************************************************************************/
@@ -185,6 +229,14 @@ void print(const thread_struct &ts){
     lcd_dprintf("%08x  %08x  %08x  %08x  %08x  %08x  %08x  %08x\n",
                 ts.cp0_status, ts.cp0_cause, ts.cp0_epc, 0, 0, 0, 0, 0);
     
+}
+
+/******************************************************************************/
+void print(const Task &task){
+    lcd_dprintf("pid:%d  state:%d\n", task.pid, task.state);
+    lcd_dprintf("stack: start:%08x end:%08x brk:%08x\n", 
+                task.stack_start, task.stack_end, task.brk);
+    print(task.tss);
 }
 
 /******************************************************************************/
