@@ -12,7 +12,9 @@
 
 #ifndef _NOEXCEPT
 #define _NOEXCEPT
-#define _NOEXCEPT_(x)
+#endif
+#ifndef _NOEXCEPT_
+#define _NOEXCEPT_(x) noexcept(x)
 #endif
 
 #include "type_traits"

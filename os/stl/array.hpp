@@ -12,8 +12,8 @@
 
 #include "type_traits"
 #include "iterator"
+#include "algorithm"
 //#include <utility>
-//#include <algorithm>
 
 namespace mpc {
     template <class _Tp, size_t _Size>
@@ -76,16 +76,16 @@ namespace mpc {
     template <class _Tp, size_t _Size>
     typename array<_Tp, _Size>::reference
     array<_Tp, _Size>::at(size_type __n) {
-        if (__n >= _Size)
-            assert(!"array::at out_of_range");
+        // if (__n >= _Size)
+        //     assert(!"array::at out_of_range");
         return __elems_[__n];
     }
 
     template <class _Tp, size_t _Size>
     typename array<_Tp, _Size>::const_reference
     array<_Tp, _Size>::at(size_type __n) const {
-        if (__n >= _Size)
-            assert(!"array::at out_of_range");
+        // if (__n >= _Size)
+        //     assert(!"array::at out_of_range");
         return __elems_[__n];
     }
 
@@ -119,11 +119,11 @@ namespace mpc {
         return !(__x < __y);
     }
 
-    template <class _Tp, size_t _Size>
-    inline typename enable_if <__is_swappable<_Tp>::value, void>::type
-    swap(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
-        __x.swap(__y);
-    }
+    // template <class _Tp, size_t _Size>
+    // inline typename enable_if <__is_swappable<_Tp>::value, void>::type
+    // swap(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+    //     __x.swap(__y);
+    // }
 
 
     // template <class _Tp, size_t _Size>

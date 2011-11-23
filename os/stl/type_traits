@@ -25,6 +25,7 @@
 #define _LIBCPP_INLINE_VISIBILITY
 #define _LIBCPP_HAS_NO_DELETED_FUNCTIONS
 #define constexpr 
+#define _NOEXCEPT_(x) noexcept(x)
 
 template <bool> struct __static_assert_test;
 template <> struct __static_assert_test<true> {};
