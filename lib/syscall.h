@@ -150,6 +150,13 @@ int sys_init(struct task_report *repo);
 int sys_fin(const struct task_report *repo);
 
 /*! 
+ *@brief シミュレーションを強制終了する.
+ *
+ *@param status 未使用
+ */ 
+int sys_abort(int status);
+
+/*! 
  *@brief アプリケーションを終了する．
  *
  *アプリケーションを終了する．
