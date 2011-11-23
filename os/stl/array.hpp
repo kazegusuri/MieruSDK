@@ -1,189 +1,158 @@
-/* The following code declares class array,
- * an STL container (as wrapper) for arrays of constant size.
- *
- * See
- *      http://www.boost.org/libs/array/
- * for documentation.
- *
- * The original author site is at: http://www.josuttis.com/
- *
- * (C) Copyright Nicolai M. Josuttis 2001.
- *
- * Distributed under the Boost Software License, Version 1.0. (See
- * accompanying file LICENSE_1_0.txt or copy at
- * http://www.boost.org/LICENSE_1_0.txt)
- *
- * 29 Jan 2004 - c_array() added, BOOST_NO_PRIVATE_IN_AGGREGATE removed (Nico Josuttis)
- * 23 Aug 2002 - fix for Non-MSVC compilers combined with MSVC libraries.
- * 05 Aug 2001 - minor update (Nico Josuttis)
- * 20 Jan 2001 - STLport fix (Beman Dawes)
- * 29 Sep 2000 - Initial Revision (Nico Josuttis)
- *
- * Jan 29, 2004
- */
+// -*- C++ -*-
+//===-------------------------- iterator ----------------------------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is dual licensed under the MIT and the University of Illinois Open
+// Source Licenses. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
-/*
-#include <cstddef>
-#include <stdexcept>
-#include <boost/assert.hpp>
-#include <boost/swap.hpp>
-
-// Handles broken standard libraries better than <iterator>
-#include <boost/detail/iterator.hpp>
-#include <boost/throw_exception.hpp>
-#include <algorithm>
-
-// FIXES for broken compilers
-#include <boost/config.hpp>
-*/
+#include "type_traits"
+#include "iterator"
+//#include <utility>
+//#include <algorithm>
 
 namespace mpc {
+    template <class _Tp, size_t _Size>
+    struct _LIBCPP_VISIBLE array {
+        typedef array __self;
+        typedef _Tp                                   value_type;
+        typedef value_type&                           reference;
+        typedef const value_type&                     const_reference;
+        typedef value_type*                           iterator;
+        typedef const value_type*                     const_iterator;
+        typedef value_type*                           pointer;
+        typedef const value_type*                     const_pointer;
+        typedef size_t                                size_type;
+        typedef ptrdiff_t                             difference_type;
+        typedef mpc::reverse_iterator<iterator>       reverse_iterator;
+        typedef mpc::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    template<class T, mpc::size_t N>
-    class array {
-      public:
-        T elems[N];    // fixed-size array of elements of type T
+        value_type __elems_[_Size > 0 ? _Size : 1];
 
-      public:
-        // type definitions
-        typedef T              value_type;
-        typedef T*             iterator;
-        typedef const T*       const_iterator;
-        typedef T&             reference;
-        typedef const T&       const_reference;
-        typedef mpc::size_t    size_type;
-        typedef mpc::ptrdiff_t difference_type;
-        typedef mpc::reverse_iterator<iterator,T> reverse_iterator;
-        typedef mpc::reverse_iterator<const_iterator,T> const_reverse_iterator;
-
-        // iterator support
-        iterator begin() { return elems; }
-        const_iterator begin() const { return elems; }
-        iterator end() { return elems+N; }
-        const_iterator end() const { return elems+N; }
-
-        reverse_iterator rbegin() { return reverse_iterator(end()); }
-        const_reverse_iterator rbegin() const {
-            return const_reverse_iterator(end());
-        }
-        reverse_iterator rend() { return reverse_iterator(begin()); }
-        const_reverse_iterator rend() const {
-            return const_reverse_iterator(begin());
-        }
-
-        // operator[]
-        reference operator[](size_type i) 
-        { 
-            assert(i < N); 
-            return elems[i];
-        }
-        
-        const_reference operator[](size_type i) const 
-        {     
-            assert(i < N);
-            return elems[i]; 
-        }
-
-        // at() with range check
-        reference at(size_type i) { rangecheck(i); return elems[i]; }
-        const_reference at(size_type i) const { rangecheck(i); return elems[i]; }
+        // No explicit construct/copy/destroy for aggregate type
+        // void fill(const value_type& __u)
+        // {mpc::fill_n(__elems_, _Size, __u);}
     
-        // front() and back()
-        reference front() 
-        { 
-            return elems[0]; 
-        }
-        
-        const_reference front() const 
-        {
-            return elems[0];
-        }
-        
-        reference back() 
-        { 
-            return elems[N-1]; 
-        }
-        
-        const_reference back() const 
-        { 
-            return elems[N-1]; 
-        }
+        // void swap(array& __a)
+        // {mpc::swap_ranges(__elems_, __elems_ + _Size, __a.__elems_);}
 
-        // size is constant
-        static size_type size() { return N; }
-        static bool empty() { return false; }
-        static size_type max_size() { return N; }
-        enum { static_size = N };
+        iterator begin()  {return iterator(__elems_);}
+        const_iterator begin() const  {return const_iterator(__elems_);}
+        iterator end()  {return iterator(__elems_ + _Size);}
+        const_iterator end() const  {return const_iterator(__elems_ + _Size);}
+    
+        reverse_iterator rbegin()  {return reverse_iterator(end());}
+        const_reverse_iterator rbegin() const  {return const_reverse_iterator(end());}
+        reverse_iterator rend()  {return reverse_iterator(begin());}
+        const_reverse_iterator rend() const  {return const_reverse_iterator(begin());}
+    
+        const_iterator cbegin() const  {return begin();}
+        const_iterator cend() const  {return end();}
+        const_reverse_iterator crbegin() const  {return rbegin();}
+        const_reverse_iterator crend() const  {return rend();}
 
-        // swap (note: linear complexity)
-        void swap (array<T,N>& y) {
-            for (size_type i = 0; i < N; ++i) {
-                boost::swap(elems[i],y.elems[i]);
-            }
-        }
+        size_type size() const  {return _Size;}
+        size_type max_size() const  {return _Size;}
+        bool empty() const  {return _Size == 0;}
 
-        // direct access to data (read-only)
-        const T* data() const { return elems; }
-        T* data() { return elems; }
+        reference operator[](size_type __n)             {return __elems_[__n];}
+        const_reference operator[](size_type __n) const {return __elems_[__n];}
+        reference at(size_type __n);
+        const_reference at(size_type __n) const;
 
-        // use array as C array (direct read/write access to data)
-        T* c_array() { return elems; }
+        reference front()             {return __elems_[0];}
+        const_reference front() const {return __elems_[0];}
+        reference back()              {return __elems_[_Size > 0 ? _Size-1 : 0];}
+        const_reference back() const  {return __elems_[_Size > 0 ? _Size-1 : 0];}
 
-        // assignment with type conversion
-        template <typename T2>
-        array<T,N>& operator= (const array<T2,N>& rhs) {
-            mpc::copy(rhs.begin(),rhs.end(), begin());
-            return *this;
-        }
-
-        // assign one value to all elements
-        void assign (const T& value)
-        {
-            mpc::fill_n(begin(),size(),value);
-        }
-
-        // check range (may be private because it is static)
-        static void rangecheck (size_type i) {
-            if (i >= size()) {
-                throw mpc::out_of_range("array<>: index out of range");
-            }
-        }
-
+        value_type* data()  {return __elems_;}
+        const value_type* data() const {return __elems_;}
     };
 
-
-    // comparisons
-    template<class T, mpc::size_t N>
-    bool operator== (const array<T,N>& x, const array<T,N>& y) {
-        return mpc::equal(x.begin(), x.end(), y.begin());
-    }
-    template<class T, mpc::size_t N>
-    bool operator< (const array<T,N>& x, const array<T,N>& y) {
-        return mpc::lexicographical_compare(x.begin(),x.end(),y.begin(),y.end());
-    }
-    template<class T, mpc::size_t N>
-    bool operator!= (const array<T,N>& x, const array<T,N>& y) {
-        return !(x==y);
-    }
-    template<class T, mpc::size_t N>
-    bool operator> (const array<T,N>& x, const array<T,N>& y) {
-        return y<x;
-    }
-    template<class T, mpc::size_t N>
-    bool operator<= (const array<T,N>& x, const array<T,N>& y) {
-        return !(y<x);
-    }
-    template<class T, mpc::size_t N>
-    bool operator>= (const array<T,N>& x, const array<T,N>& y) {
-        return !(x<y);
+    template <class _Tp, size_t _Size>
+    typename array<_Tp, _Size>::reference
+    array<_Tp, _Size>::at(size_type __n) {
+        if (__n >= _Size)
+            assert(!"array::at out_of_range");
+        return __elems_[__n];
     }
 
-    // global swap()
-    template<class T, mpc::size_t N>
-    inline void swap (array<T,N>& x, array<T,N>& y) {
-        x.swap(y);
+    template <class _Tp, size_t _Size>
+    typename array<_Tp, _Size>::const_reference
+    array<_Tp, _Size>::at(size_type __n) const {
+        if (__n >= _Size)
+            assert(!"array::at out_of_range");
+        return __elems_[__n];
     }
 
-} /* namespace boost */
+    template <class _Tp, size_t _Size>
+    inline bool operator==(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+        return mpc::equal(__x.__elems_, __x.__elems_ + _Size, __y.__elems_);
+    }
+
+    template <class _Tp, size_t _Size>
+    inline bool operator!=(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+        return !(__x == __y);
+    }
+
+    template <class _Tp, size_t _Size>
+    inline bool operator<(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+        return mpc::lexicographical_compare(__x.__elems_, __x.__elems_ + _Size, __y.__elems_, __y.__elems_ + _Size);
+    }
+
+    template <class _Tp, size_t _Size>
+    inline bool operator>(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+        return __y < __x;
+    }
+
+    template <class _Tp, size_t _Size>
+    inline bool operator<=(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+        return !(__y < __x);
+    }
+
+    template <class _Tp, size_t _Size>
+    inline bool operator>=(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+        return !(__x < __y);
+    }
+
+    template <class _Tp, size_t _Size>
+    inline typename enable_if <__is_swappable<_Tp>::value, void>::type
+    swap(const array<_Tp, _Size>& __x, const array<_Tp, _Size>& __y) {
+        __x.swap(__y);
+    }
+
+
+    // template <class _Tp, size_t _Size>
+    // class tuple_size<array<_Tp, _Size> >
+    //     : public integral_constant<size_t, _Size> {};
+
+    // template <class _Tp, size_t _Size>
+    // class tuple_size<const array<_Tp, _Size> >
+    //     : public integral_constant<size_t, _Size> {};
+
+    // template <size_t _Ip, class _Tp, size_t _Size>
+    // class tuple_element<_Ip, array<_Tp, _Size> > {
+    // public:
+    //     typedef _Tp type;
+    // };
+
+    // template <size_t _Ip, class _Tp, size_t _Size>
+    // class tuple_element<_Ip, const array<_Tp, _Size> > {
+    // public:
+    //     typedef const _Tp type;
+    // };
+
+    // template <size_t _Ip, class _Tp, size_t _Size>
+    // inline _Tp& get(array<_Tp, _Size>& __a)  {
+    //     return __a[_Ip];
+    // }
+
+    // template <size_t _Ip, class _Tp, size_t _Size>
+    // inline const _Tp& get(const array<_Tp, _Size>& __a)  {
+    //     return __a[_Ip];
+    // }
+};
