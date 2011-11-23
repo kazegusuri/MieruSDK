@@ -79,6 +79,9 @@ _start:
 		INIT_REG
 		sw		$zero, 0($zero)
 		li		$sp, 0x1fff0		# 128KB
+        li      $k0, 0xff02         # set Interupt Masks
+        mtc0    $k0, $12            # status register
+        mtc0    $zero, $5
 		j		main
 		nop
 

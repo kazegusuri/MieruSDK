@@ -118,4 +118,4 @@ typedef struct {
 } elf32_section_hdr;
 
 
-int elf_load(const char *filename);
+int elf_load(const char *filename, uint offset);

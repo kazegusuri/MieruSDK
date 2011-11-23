@@ -38,11 +38,12 @@
 #pragma once
 #include <syscall.h>
 #include <mierulib.h>
+#include <array.hpp>
 #include <list.hpp>
 
 #ifndef __ASSEMBLY__
 
-#define MAX_TASK_NUM 3
+#define MAX_TASK_NUM 8
 
 
 typedef struct _thread_struct{
@@ -86,12 +87,13 @@ public:
 class TaskManager{
     Task *current;
     Task *previous;
-    unsigned int max_pid;
-    mpc::list<Task *> tasks;
+    // unsigned int max_pid;
+    mpc::array<Task *, MAX_TASK_NUM> tasks;
     mpc::list<Task *> running;
 
     void switch_to(thread_struct *prev, thread_struct *cur);
 public:
+    const static int MAX_TASK = 8;
 
     TaskManager();
     void init();

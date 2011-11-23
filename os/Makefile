@@ -14,12 +14,12 @@ SCRIPT   = conf/os.ld.script
 MAKETYPE = std
 
 COMPILE = $(MIPSCXX)
-DEBUGOPT = -g -DTEST_MODE
+DEBUGOPT = -g 
 INCLUDEOPT = -I$(INCDIR) -I$(LIBDIR) -I$(STLDIR) -I$(TESTDIR)
 MACROOPT = -DMIERUPC_STANDALONE -DMPC_MLIB_RENAME -DMIERU_OS
-WARNINGOPT = -Wall -Wextra -Wformat=2 -Wcast-qual -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith -Winit-self -Wredundant-decls 
+WARNINGOPT = -Wall -Wextra -Wformat=2 -Wcast-qual -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith -Winit-self -Wredundant-decls -finline -finline-functions -fno-implement-inlines -Winline -fkeep-inline-functions
 STANDALONEOPT = -ffreestanding -msoft-float -nostdlib -nostdinc -fno-builtin -fno-exceptions -fno-rtti -nostartfiles -nodefaultlibs 
-MISCOPT = -std=c++0x -O2 -fno-strict-aliasing -fno-stack-protector -fcheck-new
+MISCOPT = -std=c++0x -mips32 -O2 -fno-strict-aliasing -fno-stack-protector -fcheck-new
 CFLAGS  ?= $(DEBUGOPT) $(WARNINGOPT) $(STANDALONEOPT) $(MISCOPT) $(MACROOPT) $(INCLUDEOPT)
 SFLAGS  ?= -mips32r2
 
@@ -29,7 +29,7 @@ OBJS = $(SRCDIR)/cmain.o $(SRCDIR)/kernel.o $(SRCDIR)/boot.o $(SRCDIR)/task.o \
 	$(SRCDIR)/entry.o $(SRCDIR)/syscall.o $(SRCDIR)/timer.o \
 	$(SRCDIR)/fatfile.o $(SRCDIR)/fat.o $(SRCDIR)/elf.o \
 	$(SRCDIR)/shell.o $(SRCDIR)/point.o $(SRCDIR)/cache.o \
-	$(SRCDIR)/kmalloc.o $(SRCDIR)/assert.o \
+	$(SRCDIR)/kmalloc.o $(SRCDIR)/assert.o $(SRCDIR)/register.o \
 	$(SRCDIR)/sandbox.o \
 	$(TESTDIR)/test.o \
 	$(TESTDIR)/test_kmalloc.o $(TESTDIR)/test_list.o\

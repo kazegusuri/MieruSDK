@@ -142,3 +142,37 @@ exc_entry:
         nop
         .end exc_entry
 
+.section .tlb,"ax"
+        .abicalls
+        .globl tlb_entry
+        .ent tlb_entry
+tlb_entry:
+        .set noreorder
+        mfc0    $k0, $10       # EntryHi
+        andi    $k1, $k0, 0x7  # extract ASID(3bits)
+        sll     $k0, $k0, 12   # clear out [31-23] bits
+        srl     $k0, $k0, 22   # clear out [9-0] bits
+        sll     $k0, $k0, 6    #
+        sll     $k1, $k1, 16   #
+        or      $k0, $k0, $k1  #
+        addiu   $k1, $zero, -0x40 #
+        and     $k0, $k0, $k1  #
+        ori     $k0, $k0, 0x2  #
+        mtc0    $k0, $2        # EntryLo0
+        mtc0    $k0, $3        # EntryLo0
+        ehb                    #
+        tlbwr                  #
+        eret
+        nop
+        .end tlb_entry
+
+.section .int,"ax"
+        .abicalls
+        .globl int_entry
+        .ent int_entry
+int_entry:
+        .set noreorder
+        eret
+        nop
+        .end int_entry
+

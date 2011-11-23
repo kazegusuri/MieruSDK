@@ -31,8 +31,8 @@
  *@brief elf file management
  *@author Masahiro Sano
  *@since 2010/06/14
- *@date 2010/06/14
- *@version 0.1
+ *@date 2011/11/23
+ *@version 0.2
  */
 
 #include <mierulib.h>
@@ -96,15 +96,15 @@ int elf_check(const elf32_elf_hdr *ehdr){
     }
 
     //check entry point
-    if(ehdr->entry != APPLICATION_ENTRY){
-        return -8;
-    }
+    // if(ehdr->entry != APPLICATION_ENTRY){
+    //     return -8;
+    // }
 
     return 0;
 }
 
 /******************************************************************************/
-int elf_load(const char *filename){
+int elf_load(const char *filename, uint offset){
     int fd;
     elf32_elf_hdr ehdr;
     elf32_section_hdr shdr;
@@ -143,7 +143,7 @@ int elf_load(const char *filename){
 
         if(shdr.flags & ELF_SECTION_FLAG_ALLOC){
             if(shdr.type & ELF_SECTION_TYPE_NOBITS){
-                memset((void *)shdr.addr, 0, shdr.size);
+                memset((void *)(shdr.addr + offset), 0, shdr.size);
             }else{
                 ret = sys_lseek(fd, shdr.offset, SEEK_SET);
                 if(ret < 0){
@@ -151,7 +151,7 @@ int elf_load(const char *filename){
                     return -11;
                 }
 
-                ret = sys_read(fd, (void *)shdr.addr, shdr.size);
+                ret = sys_read(fd, (void *)(shdr.addr + offset), shdr.size);
                 if(ret < 0){
                     sys_close(fd);
                     return -12;
@@ -160,7 +160,7 @@ int elf_load(const char *filename){
             }
         }
     }
-    stack_end = shdr.offset + shdr.size + 0x10000;
+    stack_end = shdr.offset + shdr.size + 0x10000 + offset;
     stack_end = (stack_end + 0x1f) & 0xffffffe0; // 32 Byte align
 
     sys_close(fd);

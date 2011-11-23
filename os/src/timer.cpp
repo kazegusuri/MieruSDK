@@ -31,7 +31,8 @@
  *@brief Timer handler.
  *@author Masahiro Sano
  *@date 2011/09/23
- *@date 2011/11/04
+ *@date 2011/11/23
+ *@version 0.2
  */
 
 #include <mierulib.h>
@@ -55,23 +56,6 @@ void init_timer(){
 void timer_handler(){
     disable_global_interupt();
     update_timer(0x100);
-    //int pid = Kernel::getInstance()->taskmanager.getCurrentTask()->pid;
-    /*
-    if(pid == 0){
-        Kernel::getInstance()->taskmanager.switchContext(
-            Kernel::getInstance()->taskmanager.getCurrentTask(), 
-            &Kernel::getInstance()->taskmanager.tasks[1]);
-
-    }else if(pid == 1){
-        Kernel::getInstance()->taskmanager.switchContext(
-            Kernel::getInstance()->taskmanager.getCurrentTask(), 
-            &Kernel::getInstance()->taskmanager.tasks[2]);
-
-    }else if(pid == 2){
-        Kernel::getInstance()->taskmanager.switchContext(
-            Kernel::getInstance()->taskmanager.getCurrentTask(), 
-            &Kernel::getInstance()->taskmanager.tasks[1]);
-    }
-    */
+    Kernel::getInstance()->taskmanager.switchContext();
     enable_global_interupt();
 }

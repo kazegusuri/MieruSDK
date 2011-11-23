@@ -31,8 +31,8 @@
  *@brief memory allocator for kernel.
  *@author Masahiro Sano
  *@since 2010/10/20
- *@date 2011/11/04
- *@version 0.2
+ *@date 2011/11/23
+ *@version 0.3
  */
 
 #include <kernel.h>
@@ -81,7 +81,7 @@ void Kernel::init(){
     init_syscall();
     //init_timer();
     init_exception();
-    clear_kernel_mode();
+    //clear_exception();
     enable_global_interupt();
     ret = fat.init();
     if(ret < 0){
@@ -126,7 +126,7 @@ void Kernel::start(){
     sandbox();
 
     Shell *sh = new Shell();
-    message();
+    // message();
     sh->run();
     delete sh;
 }

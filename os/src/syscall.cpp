@@ -31,7 +31,8 @@
  *@brief syscall implementation
  *@author Masahiro Sano
  *@since 2010/06/14
- *@date 2011/11/04
+ *@date 2011/11/23
+ *@version 0.2
  */
 
 #include <kernel.h>
@@ -46,7 +47,6 @@
 #define MAX_STACK_SIZE 4096
 
 static int (*syscall_table[64])(uint,uint,uint,uint);
-
 
 /******************************************************************************/
 File *preopen(const char *name){
@@ -183,7 +183,8 @@ int sys_execve(const char *filename, char *const argv[], char *const envp[]){
     unsigned int argv_pos;
     int argc, i, len;
     int stack_end;
-    ret = elf_load(filename);
+    ret = elf_load(filename, 0x100000);
+    // ret = elf_load(filename, 0x000000);
     if(ret < 0)
         return ret;
     stack_end = ret;
@@ -231,9 +232,12 @@ int sys_execve(const char *filename, char *const argv[], char *const envp[]){
     *tmp_sp   = 0;        //envp
     
     current->tss.sp = sp;
-    current->tss.ra = 0x20000;
-    current->tss.cp0_status = 0;
-    current->tss.cp0_epc = 0;
+    // current->tss.ra = 0x20000;
+    current->tss.ra = (uint)Inst::eret;
+    current->tss.cp0_status = 0xff13;
+    // current->tss.cp0_status = 0;
+    current->tss.cp0_epc = 0x00000;
+    // current->tss.cp0_epc = 0x020000;
     current->tss.cp0_cause = 0;
     
     current->stack_start = sp;

@@ -75,6 +75,21 @@
 #ifndef __ASSEMBLY__
 #include <task.h>
 
+namespace Inst {
+    extern "C" void eret(void);
+    void tlbr(void);
+    void tlbwr(void);
+    void tlbwi(void);
+    void tlbp(void);
+    void ehb(void);
+};
+
+void clear_kernel_mode();
+void set_kernel_mode();
+void clear_exception();
+void disable_global_interupt();
+void enable_global_interupt();
+
 void init_exception();
 extern "C" void exception_handler(thread_struct *ts);
 #endif

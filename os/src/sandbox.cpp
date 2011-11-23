@@ -30,17 +30,118 @@
  *@brief temporary test file
  *@author Masahiro Sano
  *@since 2011/11/04
- *@date 2011/11/04
+ *@date 2011/11/23
  */
 
 #include <kernel.h>
 #include <mierulib.h>
 #include <cache.h>
 #include <task.h>
+#include <timer.h>
+#include <exception.h>
 
 #include <list.hpp>
 #include <initializer_list>
+#include <register.h>
+#include <array.hpp>
 
+void simulate_task_switch();
+void process1();
+void process2();
+
+void sandbox() {
+    if(0){
+        //mpc::array<int, 5> a = {1,2,3,4,5};
+        mpc::array<int, 5> a;
+        int i;
+        for(auto v = a.begin(); v != a.end(); v++) {
+            lcd_dprintf("%d\n", *v);
+        }
+
+        mpc::array<int, 5> b;
+        for(i=0;i<5;i++){
+            b[i] = i+1;
+        }
+        if ( a == b ){
+            lcd_dprintf("aaaa\n");
+        }
+
+        mpc::array<int, 10> *c;
+        lcd_dprintf("size %d %d\n", sizeof(c), sizeof(a));
+        c = new mpc::array<int, 10>;
+        lcd_dprintf("size %d %d\n", sizeof(c), sizeof(*c));
+    }
+    
+    if(0){
+        using namespace Register::CP0;
+        lcd_dprintf("%d\n", Register::General::V0);
+        Status::set(100);
+        Status::load();
+        uint h = Status::get();
+
+        lcd_dprintf("%08x %d\n", h, Register::CP0::SR);
+        lcd_dprintf("%08x\n", ~(0xff << 8));
+
+        EntryLo0::set(0xffffffff);
+        //EntryLo0::valid(0);
+        EntryLo0::cache(0);
+        lcd_dprintf("%08x\n", EntryLo0::get());
+    }
+    //for(;;);
+    // volatile char *ptr = (volatile char *) MP_MMAP_TLBMODE;
+    // *ptr = 1;
+
+    simulate_task_switch();
+}
+
+/******************************************************************************/
+void simulate_task_switch(){
+    Kernel *kernel = Kernel::getInstance();
+    TaskManager &manager = kernel->taskmanager;
+
+    Task *t1 = kernel->taskmanager.getTask();
+    Task *t2 = kernel->taskmanager.getTask();
+
+    uint sp1 = 0x50000 - 16;
+    uint sp2 = 0x80000 - 16;
+
+    t1->tss.sp = sp1;
+    //t1->tss.gp = gp;
+    t1->tss.ra = (uint)process1;
+    t1->tss.cp0_status = 0xff01;
+    t1->tss.cp0_epc = 0;
+    t1->tss.cp0_cause = 0;
+    t1->stack_start = sp1;
+    t1->stack_end   = 0x20000 + 16;
+    t1->brk         = 0x20000 + 16;
+    lcd_dprintf("t1: pid:%d \n", t1->pid);
+    manager.startTask(t1);
+
+
+    t2->tss.sp = sp2;
+    //t2->tss.gp = gp;
+    t2->tss.ra = (uint)process2;
+    t2->tss.cp0_status = 0xff01;
+    t2->tss.cp0_epc = 0;
+    t2->tss.cp0_cause = 0;
+    t2->stack_start = sp2;
+    t2->stack_end   = sp1+32;
+    t2->brk         = sp1+32;
+    lcd_dprintf("t2: pid:%d \n", t2->pid);
+    manager.startTask(t2);
+
+
+    invalidate_icache();
+    invalidate_dcache();
+
+    lcd_dprintf("start!!!\n");
+    init_timer();
+
+    manager.switchContext();
+    for(;;);
+}
+
+/******************************************************************************/
 void process1(){
     lcd_dprintf("process1 start\n");
     int loop = 0;
@@ -49,9 +150,6 @@ void process1(){
             lcd_dprintf("process1\n");
             usleep(200000);
         }
-
-        Kernel::getInstance()->taskmanager.switchContext();
-        lcd_dprintf("process1 restart!!\n");
 
         if(loop % 4 == 1){
             lcd_dprintf("STOP PROC 2\n");
@@ -74,6 +172,7 @@ void process1(){
     for(;;);
 }
 
+/******************************************************************************/
 void process2(){
     lcd_dprintf("process1 start\n");
     int loop = 0;
@@ -82,8 +181,6 @@ void process2(){
             lcd_dprintf("process2\n");
             usleep(200000);
         }
-        Kernel::getInstance()->taskmanager.switchContext();
-        lcd_dprintf("process2 restart!!\n");
 
         if(loop % 4 == 1){
             lcd_dprintf("STOP PROC 1\n");
@@ -105,56 +202,4 @@ void process2(){
     }
     for(;;);
 }
-
-void sandbox() {
-
-    Kernel *kernel = Kernel::getInstance();
-    TaskManager &manager = kernel->taskmanager;
-
-    Task *t1 = kernel->taskmanager.getTask();
-    Task *t2 = kernel->taskmanager.getTask();
-
-    uint sp1 = 0x50000 - 16;
-    uint sp2 = 0x80000 - 16;
-
-    // __asm__ volatile ("move %0, $gp;" : "=r" (gp));
-    // lcd_dprintf("%d %d %08x\n", t1->pid, t2->pid, gp);
-
-    t1->tss.sp = sp1;
-    //t1->tss.gp = gp;
-    t1->tss.ra = (uint)process1;
-    t1->tss.cp0_status = 1;
-    t1->tss.cp0_epc = 0;
-    t1->tss.cp0_cause = 0;
-    t1->stack_start = sp1;
-    t1->stack_end   = 0x20000 + 16;
-    t1->brk         = 0x20000 + 16;
-    lcd_dprintf("t1: pid:%d \n", t1->pid);
-    manager.startTask(t1);
-
-
-    t2->tss.sp = sp2;
-    //t2->tss.gp = gp;
-    t2->tss.ra = (uint)process2;
-    t2->tss.cp0_status = 1;
-    t2->tss.cp0_epc = 0;
-    t2->tss.cp0_cause = 0;
-    t2->stack_start = sp2;
-    t2->stack_end   = sp1+32;
-    t2->brk         = sp1+32;
-    lcd_dprintf("t2: pid:%d \n", t2->pid);
-    manager.startTask(t2);
-
-
-    invalidate_icache();
-    invalidate_dcache();
-
-    lcd_dprintf("start!!!\n");
-
-    // print(*t1);
-    // print(*t2);
-    manager.switchContext();
-    //kernel->taskmanager.switchContext(kernel->taskmanager.getCurrentTask(), t1);
-
-    for(;;);
-}
+/******************************************************************************/

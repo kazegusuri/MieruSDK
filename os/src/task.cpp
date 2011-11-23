@@ -31,35 +31,39 @@
  *@brief task implemetation
  *@author Masahiro Sano
  *@since 2010/06/14
- *@date 2011/11/04
+ *@date 2011/11/23
+ *@version 0.2
  */
 
 #include <kernel.h>
 #include <mierulib.h>
 #include <task.h>
+#include <register.h>
 
 /******************************************************************************/
-TaskManager::TaskManager() :
-    max_pid(0)
+TaskManager::TaskManager()
 {
 }
 
 /******************************************************************************/
 void TaskManager::init(){
-    max_pid = 0;
+    for(int i = 0; i < (int)tasks.size(); i++){
+        tasks[i] = new Task();
+        tasks[i]->pid = i;
+        tasks[i]->state = Task::TASK_STATE_ALLOC;
+    }
     current = getTask();
     previous = NULL;
 }
 
 /******************************************************************************/
 Task *TaskManager::getTask(){
-    Task *p = new Task();
-    tasks.push_back(p);
-    p->state = Task::TASK_STATE_STOP;
-
-    // TODO: need atomic op
-    p->pid = max_pid++;
-    return p;
+    for(auto task = tasks.begin(); task != tasks.end(); ++task) {
+        if ((*task)->state != Task::TASK_STATE_ALLOC) continue;
+        (*task)->state = Task::TASK_STATE_STOP;
+        return *task;
+    }
+    return NULL;
 }
 
 /******************************************************************************/
@@ -75,32 +79,33 @@ Task *TaskManager::getPreviousTask(){
 /******************************************************************************/
 Task *TaskManager::getKernelTask(){
     //return &tasks[0];
-    return tasks.front();
+    return tasks[0];
 }
 
 /******************************************************************************/
 Task *TaskManager::findTask(int pid){
-    for (auto it = tasks.begin(); it != tasks.end(); ++it) {
-        if ((*it)->pid == pid) return *it;
-    }
-
-    return NULL;
+    // for (auto it = tasks.begin(); it != tasks.end(); ++it) {
+    //     if ((*it)->pid == pid) return *it;
+    // }
+    if (pid >= TaskManager::MAX_TASK) return NULL;
+    return tasks[pid];
 }
 
 /******************************************************************************/
 bool TaskManager::freeTask(int pid){
     if(pid == 0) return false;
     
-    for (auto it = tasks.begin();  it != tasks.end(); ++it) {
-        if((*it)->pid != pid) continue;
-
-        tasks.erase(it);
-        assert((*it)->pid == Task::TASK_STATE_STOP);
-        delete *it;
-        return true;
-    }
-
-    return false;
+    // for (auto it = tasks.begin();  it != tasks.end(); ++it) {
+    //     if((*it)->pid != pid) continue;
+    //     tasks.erase(it);
+    //     assert((*it)->pid == Task::TASK_STATE_STOP);
+    //     delete *it;
+    //     return true;
+    // }
+    if (pid >= TaskManager::MAX_TASK) return false;
+    assert(tasks[pid]->pid == Task::TASK_STATE_STOP);
+    tasks[pid]->state = Task::TASK_STATE_ALLOC;
+    return true;
 }
 
 /******************************************************************************/
@@ -144,8 +149,21 @@ void TaskManager::switchContext(){
 
 /******************************************************************************/
 void TaskManager::switchContext(Task *cur, Task *next){
+    volatile char *ptr = (volatile char *) MP_MMAP_TLBMODE;
+    *ptr = 1;
+
     current = next;
     previous = cur;
+    lcd_dprintf("[switchContext] nextpid: %d\n", next->pid);
+    // Register::CP0::EntryHi::load();
+    Register::CP0::EntryHi::asid(next->pid);
+    Register::CP0::EntryHi::store();
+    // uint hi = get_entlyhi();
+    // lcd_dprintf("EntryHi: %08x\n", hi);
+    // hi = ((hi >> 8) << 8) | next->pid;
+    // set_entlyhi(hi);
+    lcd_dprintf("[switchContext] EntryHi: %08x\n",
+                Register::CP0::EntryHi::get());
     switch_to(&cur->tss, &next->tss);
 }
 
