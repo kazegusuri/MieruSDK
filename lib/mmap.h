@@ -55,6 +55,8 @@
 #define MP_MMAP_MMC_CONTROL  (MP_MMAP_OFFSET + 0x108) ///< MMCへのコマンドのメモリマップ
 #define MP_MMAP_TIMER        (MP_MMAP_OFFSET + 0x10c) ///< 現在時刻のメモリマップ
 
+#define MP_MMAP_TLBMODE      (MP_MMAP_OFFSET + 0x120) ///< TLBを使用するか
+
 #define MP_MMAP_GPIO_0       (MP_MMAP_OFFSET + 0x1f0) ///< GPIOのメモリマップ
 #define MP_MMAP_GPIO_4       (MP_MMAP_OFFSET + 0x1f4) ///< GPIOのメモリマップ
 #define MP_MMAP_GPIO_8       (MP_MMAP_OFFSET + 0x1f8) ///< GPIOのメモリマップ
