@@ -4,7 +4,18 @@
  *  Dual licensed under New BSD or GPL v2 licenses.                   *
  *  See COPYING file on the base directory for more information.      *
  **********************************************************************/
-#include "define.h"
+#include "define2.h"
+
+#define SGN(x) ((x) & 0x80000000)
+enum {
+    LOADSTORE_2B       = LOAD_2B | STORE_2B,
+    LOADSTORE_4B_ALIGN = LOAD_4B_ALIGN | STORE_4B_ALIGN,
+
+    TLB_OP_READ         = 1,
+    TLB_OP_WRITE_INDEX  = 2,
+    TLB_OP_WRITE_RANDOM = 3,
+    TLB_OP_LOOKUP       = 4,
+};
 
 /**********************************************************************/
 void MipsInst::clear()
@@ -14,6 +25,8 @@ void MipsInst::clear()
     attr = READ_NONE | WRITE_NONE;
     mnemonic[0] = '\0';
     instname = NULL;
+    rc0 = 0;
+    tlbop = 0;
 }
 
 /**********************************************************************/
@@ -477,23 +490,60 @@ void MipsInst::decode()
 /**********************************************************************/
 int MipsInst::execute()
 {
+    int ret = 0;
     switch (op) {
     case NOP______:
     case SSNOP____:
     case WAIT_____:
-    case TGE______:
-    case TGEU_____:
-    case TLT______:
-    case TLTU_____:
-    case TEQ______:
-    case TNE______:
-    case TGEI_____:
-    case TGEIU____:
-    case TLTI_____:
-    case TLTIU____:
-    case TEQI_____:
-    case TNEI_____:
         // do nothing
+        break;
+    case TGE______:
+        if ((int032_t) rrs >= (int032_t) rrt)
+            ret = EXC_TRAP___;
+        break;
+    case TGEU_____:
+        if (rrs >= rrt)
+            ret = EXC_TRAP___;
+        break;
+    case TLT______:
+        if ((int032_t) rrs < (int032_t) rrt)
+            ret = EXC_TRAP___;
+        break;
+    case TLTU_____:
+        if (rrs < rrt)
+            ret = EXC_TRAP___;
+        break;
+    case TEQ______:
+        if (rrs == rrt)
+            ret = EXC_TRAP___;        
+        break;
+    case TNE______:
+        if (rrs != rrt)
+            ret = EXC_TRAP___;        
+        break;
+    case TGEI_____:
+        if ((int032_t) rrs >= (int032_t) exts32(imm, 16))
+            ret = EXC_TRAP___;
+        break;
+    case TGEIU____:
+        if (rrs >= exts32(imm, 16))
+            ret = EXC_TRAP___;
+        break;
+    case TLTI_____:
+        if ((int032_t) rrs < (int032_t) exts32(imm, 16))
+            ret = EXC_TRAP___;
+        break;
+    case TLTIU____:
+        if (rrs < exts32(imm, 16))
+            ret = EXC_TRAP___;
+        break;
+    case TEQI_____:
+        if (rrs == exts32(imm, 16))
+            ret = EXC_TRAP___;        
+        break;
+    case TNEI_____:
+        if (rrs != exts32(imm, 16))
+            ret = EXC_TRAP___;        
         break;
     case SLL______:
         rslt32 = rrt << shamt;
@@ -533,8 +583,11 @@ int MipsInst::execute()
         cond = (rrt != 0);
         break;
     case SYSCALL__:
-        return 1; // call mips->syscall();
+        ret = EXC_SYSCALL;
+        // return 1; // call mips->syscall();
+        break;
     case BREAK____:
+        ret = EXC_BP_____;
         break;
     case SYNC_____:
         // LD/ST barrier, nothing to do for functional simulator
@@ -576,10 +629,18 @@ int MipsInst::execute()
         }
         break;
     case ADD______:
+        if ((SGN(rrs) == SGN(rrt)) && (SGN(rrs) != SGN(rslt32)))
+            ret = EXC_OV_____;
+        rslt32 = rrs + rrt;
+        break;
     case ADDU_____:
         rslt32 = rrs + rrt;
         break;
     case SUB______:
+        if ((SGN(rrs) != SGN(rrt)) && (SGN(rrs) != SGN(rslt32)))
+            ret = EXC_OV_____;
+        rslt32 = rrs - rrt;
+        break;
     case SUBU_____:
         rslt32 = rrs - rrt;
         break;
@@ -647,6 +708,11 @@ int MipsInst::execute()
         cond = ((int032_t) rrs > 0);
         break;
     case ADDI_____:
+        if ((SGN(rrs)    == SGN(exts32(imm, 16))) &&
+            (SGN(rslt32) != SGN(exts32(imm, 16))))
+            ret = EXC_OV_____;
+        rslt32 = rrs + exts32(imm, 16);
+        break;        
     case ADDIU____:
         rslt32 = rrs + exts32(imm, 16);
         break;
@@ -669,6 +735,8 @@ int MipsInst::execute()
         rslt32 = imm << 16;
         break;
     case MFC0_____:
+        rslt32 = rc0;
+        break;
     case CFC0_____:
         rslt32 = 0;
         break;
@@ -676,12 +744,21 @@ int MipsInst::execute()
         rslt32 = rrt;
         break;
     case TLBR_____:
+        tlbop = TLB_OP_READ;
+        break;
     case TLBWI____:
+        tlbop = TLB_OP_WRITE_INDEX;
+        break;
     case TLBWR____:
+        tlbop = TLB_OP_WRITE_RANDOM;
+        break;
     case TLBP_____:
+        tlbop = TLB_OP_LOOKUP;
         break;
     case ERET_____:
-        cond = 0;
+        // npc = rc0;
+        cond = 1;
+        // cond = 0;
         break;
     case MADD_____:
     {
@@ -750,8 +827,13 @@ int MipsInst::execute()
         break;
     default:
         return -1;
+    // === cp0 control and others ===
+    case FLOAT_OPS:
+        ret = EXC_CPU____ | EXC_CPU1___;
+        break;
+
     }
-    return 0;
+    return ret;
 }
 
 /**********************************************************************/

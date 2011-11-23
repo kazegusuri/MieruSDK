@@ -11,19 +11,20 @@ EXECUTABLES = bin/SimMips bin/SimMipsM bin/SimMipsOS bin/SimMipsF \
 
 ##########################################################################
 all:
-	mkdir -p bin
-	${MAKE} -C ${CORE}
-	${MAKE} -C ${MC}
-	${MAKE} -C ${OS}
-	${MAKE} -C ${FLOAT}
-	${MAKE} -C ${MIERU}
-	${MAKE} copy
+#	mkdir -p bin
+#	${MAKE} -C ${CORE}
+#	${MAKE} -C ${MC}
+#	${MAKE} -C ${OS}
+#	${MAKE} -C ${FLOAT}
+#	${MAKE} -C ${MIERU}
+	${MAKE} -C ./src
+#	${MAKE} copy
 
 copy:
-	${MAKE} -C ${CORE} copy
-	${MAKE} -C ${MC} copy
-	${MAKE} -C ${OS} copy
-	${MAKE} -C ${FLOAT} copy
+#	${MAKE} -C ${CORE} copy
+#	${MAKE} -C ${MC} copy
+#	${MAKE} -C ${OS} copy
+#	${MAKE} -C ${FLOAT} copy
 	${MAKE} -C ${MIERU} copy
 
 clean:
@@ -32,6 +33,7 @@ clean:
 	${MAKE} -C ${OS} clean
 	${MAKE} -C ${FLOAT} clean
 	${MAKE} -C ${MIERU} clean
+	${MAKE} -C ./src clean
 	rm -f ${EXECUTABLES}
 
 ##########################################################################

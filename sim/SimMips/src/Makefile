@@ -16,6 +16,7 @@ OBJECT  = $(SOURCE:.cc=.o)
 ##########################################################################
 all:
 	$(MAKE) $(TARGET)
+	cp $(TARGET) ../bin/
 ##########################################################################
 $(TARGET): $(SOURCE) $(HEADER) Makefile
 	$(CC) $(OFLAG) -o $@ $(SOURCE) $(LFLAG)
@@ -56,4 +57,9 @@ cflow:
 
 clean:
 	rm -f *.o *~ $(TARGET) code.cc code.ps code.pdf
+##########################################################################
+## This is just for flymake(emacs)
+.PHONY: check-syntax
+check-syntax:
+	$(CC) $(CFLAGS) $(LFLAGS) -fsyntax-only  $(CHK_SOURCES)
 ##########################################################################

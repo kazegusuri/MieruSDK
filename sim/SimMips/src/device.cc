@@ -13,6 +13,7 @@ enum {
     MIERU_MMC_CONTROL = 0x08,
     MIERU_CNT         = 0x0c,
     MIERU_OLDKEY      = 0x10,
+    MIERU_TLB         = 0x20,
 
     MIERU_POLL_CYCLE  = 0x1000,
 };
@@ -193,6 +194,8 @@ void MieruIO::read1b(uint032_t addr, uint008_t *data)
                       (swbuf == 'J') ? 2 :
                       (swbuf == 'K') ? 1 : 0);
         }
+    } else if (addr == MIERU_TLB) {
+        *data = static_cast<ChipMP *>(board->chip)->tlbmode;
     } else {
         *data = 0;
     }
@@ -225,8 +228,12 @@ void MieruIO::write4b(uint032_t addr, uint032_t data)
 /**********************************************************************/
 void MieruIO::write1b(uint032_t addr, uint008_t data)
 {
-    if (addr == MIERU_LCD)
+    if (addr == MIERU_LCD) {
         dispcon->write(0, 1, data);
+    } else if (addr == MIERU_TLB) {
+        static_cast<ChipMP *>(board->chip)->tlbmode = (data != 0);
+        printf("MieruIO: TLB Mode %s\n", (data != 0) ? "on" : "off");
+    }
 }
 
 /************************************************************************/

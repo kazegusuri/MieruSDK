@@ -6,6 +6,16 @@
  **********************************************************************/
 #include "define2.h"
 
+enum {
+    LOADSTORE_2B       = LOAD_2B | STORE_2B,
+    LOADSTORE_4B_ALIGN = LOAD_4B_ALIGN | STORE_4B_ALIGN,
+
+    TLB_OP_READ         = 1,
+    TLB_OP_WRITE_INDEX  = 2,
+    TLB_OP_WRITE_RANDOM = 3,
+    TLB_OP_LOOKUP       = 4,
+};
+
 /**********************************************************************/
 BoardMP::BoardMP()
 {
@@ -145,6 +155,7 @@ void ChipMP::init()
     cp0 = new MipsCp0Lite(static_cast<BoardMP *>(board));
     mips = new MipsMP(static_cast<BoardMP *>(board), this);
     mips->init();
+    tlbmode = false;
 }
 
 /**********************************************************************/
@@ -185,9 +196,57 @@ void MipsMP::drive()
 }
 
 /**********************************************************************/
+void MipsMP::decode()
+{
+    uint064_t phaddr = (uint064_t) inst->pc;
+    int ret;
+
+    if ((ret = cp0->getphaddr(inst->pc, &phaddr, 0)) != 0) {
+        inst->vaddr = inst->pc;
+        exception(ret);
+        return;
+    }
+
+    if (mc->read(phaddr, 4, &inst->ir)) {
+        board->simerror();
+        return;
+    }
+    inst->decode();
+
+    if (board->debug_inst && !chip->issilent())
+        printf("[%10lld] %08x: %s\n",
+               ss->inst_count, inst->pc, inst->getmnemonic());
+
+    if (board->imix_mode && !chip->issilent())
+        ss->imix[inst->op]++;
+}
+
+/**********************************************************************/
 void MipsMP::execute()
 {
-    Mips::execute();
+    int ret = inst->execute();
+    // address translation
+    if (inst->attr & LOADSTORE) {
+        if ((inst->attr & (LOADSTORE_2B      ) && inst->vaddr & 0x1) ||
+            (inst->attr & (LOADSTORE_4B_ALIGN) && inst->vaddr & 0x3) ) {
+            ret = EXC_ADEL___;
+        } else {
+            ret = cp0->getphaddr(inst->vaddr, &inst->paddr, 
+                                 ((inst->attr & STORE_ANY) != 0));
+        }
+    }
+    if (ret == -1) {
+        fprintf(stderr, "!! UNKNOWN INSTRUCTION: %08x %08x\n",
+                inst->pc, inst->ir);
+        board->simerror();
+    } else if(ret) {
+        if (ret == EXC_SYSCALL) {
+            syscall();
+        } else {
+            exception(ret);
+        }
+    }
+
     if (inst->op == MFC0_____)
         inst->rslt32 = cp0->readreg(inst->rd);
 }
@@ -196,8 +255,20 @@ void MipsMP::execute()
 void MipsMP::writeback()
 {
     Mips::writeback();
-    if (inst->op == MTC0_____)
+    if (inst->op == MTC0_____) {
         cp0->writereg(inst->rd, inst->rslt32);
+    }
+
+    int tlbop = inst->tlbop;
+    if (tlbop == TLB_OP_READ) {
+        cp0->tlbread();
+    } else if  (tlbop == TLB_OP_WRITE_INDEX){
+        cp0->tlbwrite(0);
+    } else if (tlbop == TLB_OP_WRITE_RANDOM) {
+        cp0->tlbwrite(1);
+    } else if (tlbop == TLB_OP_LOOKUP) {
+        cp0->tlblookup();
+    }
 }
 
 /**********************************************************************/
@@ -213,10 +284,10 @@ void MipsMP::setnpc()
     }
     if (inst->op == ERET_____) {
         as->pc = cp0->readreg(CP0_EPC_____);
-        if (!as->pc) {
-            printf("!! Branch to zero. stop.\n");
-            board->simerror();
-        }
+        // if (!as->pc) {
+        //     printf("!! Branch to zero. stop.\n");
+        //     board->simerror();
+        // }
         cp0->modifyreg(CP0_SR______, 0, 0x2);
     }
 }

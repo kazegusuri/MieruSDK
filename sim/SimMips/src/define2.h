@@ -13,26 +13,58 @@ enum {
     LCD_BUF_SIZE = 2048,
     MMC_BLOCK_SIZE = 512,
     MIERU_NUM_KEYBUF = 16,
+
+    NCREG = 256,
+    TLB_ENTRY = 16,
+
+    CZ_PAGE_SIZE = 0x1000,  // 4KiB
+    CP0_POLL_CYCLE = 100,
 };
 
 class BoardMP;
 class ChipMP;
 
 /* cp0.cc *************************************************************/
+class MipsTlbEntry {
+ public:
+    uint vpn2;
+    uint asid;
+    uint pagemask;
+    uint pageshift;
+    uint global;
+    uint pfn[2];
+    uint valid[2];
+    uint dirty[2];
+    uint cache[2];
+
+    MipsTlbEntry();
+    void print();
+};
+
+/**********************************************************************/
 class MipsCp0Lite {
  private:
     Board *board;
     ChipMP *chip;
-    uint032_t count, compare, sr, cause, epc;
+    MipsTlbEntry tlb[TLB_ENTRY];
+    uint032_t r[NCREG];
     uint032_t lastcount;
-    int timerint, counter;
+    uint032_t counter;
+
+    int gettlbentry(uint032_t);
+    void regprint();
+    void tlbprint();
 
  public:
     MipsCp0Lite(BoardMP *);
     void step();
+    void tlbread();
+    void tlbwrite(int);
+    void tlblookup();
     uint032_t readreg(int);
     void writereg(int, uint032_t);
     void modifyreg(int, uint032_t, uint032_t);
+    int getphaddr(uint032_t, uint064_t *, int);
     uint032_t doexception(int, uint032_t, uint032_t, int);
     void setinterrupt(int);
     void clearinterrupt(int);
@@ -163,6 +195,7 @@ class BoardMP : public Board {
 class ChipMP : public Chip {
  public:
     MipsCp0Lite *cp0;
+    bool tlbmode;
 
     ChipMP(BoardMP *board) : Chip(board) {}
     virtual void init();
@@ -181,6 +214,7 @@ class MipsMP : public Mips {
     virtual void setnpc();
     virtual void syscall();
     virtual void exception(int);
+    virtual void decode();
 
  public:
     MipsMP(BoardMP *board, ChipMP *chip);
@@ -190,27 +224,89 @@ class MipsMP : public Mips {
 /**********************************************************************/
 enum {
     SYS_MMCSYNC = 5000,
+};
 
+/* Exception Code Definition ******************************************/
+/**********************************************************************/
+enum {
     EXC_INT____ = 0,  // Interupt
+    EXC_MOD____ = 1,  // Modifying read-only page
+    EXC_TLBL___ = 2,  // TLB miss load
+    EXC_TLBS___ = 3,  // TLB miss store
+    EXC_ADEL___ = 4,  // Address error load
+    EXC_ADES___ = 5,  // Address error store
+    EXC_IBE____ = 6,  // Bus error inst
+    EXC_DBE____ = 7,  // Bus error data
     EXC_SYSCALL = 8,  // System call
+    EXC_BP_____ = 9,  // Breakpoint
+    EXC_RI_____ = 10, // Illegal instruction
+    EXC_CPU____ = 11, // Coprocessor unavailable
+    EXC_OV_____ = 12, // Overflow
+    EXC_TRAP___ = 13, // Trap instruction
+    // # Codes below are NOT architectually defined
+    EXC_TLBREFL = 0x100, // TLB Refill flag (for TLBL, TLBS)
+    EXC_CPU1___ = 0x200, // CP1 unavailable? (for CPU)
+};
 
+/* CP0 Register Definition ********************************************/
+/**********************************************************************/
+enum {
+    CP0_INDEX___ = 0,
+    CP0_RANDOM__ = 1,
+    CP0_ENTRYLO0 = 2,
+    CP0_ENTRYLO1 = 3,
+    CP0_CONTEXT_ = 4,
+    CP0_PAGEMASK = 5,
+    CP0_WIRED___ = 6,
+    CP0_BADVADDR = 8,
     CP0_COUNT___ = 9,
+    CP0_ENTRYHI_ = 10,
     CP0_COMPARE_ = 11,
     CP0_SR______ = 12,
     CP0_CAUSE___ = 13,
     CP0_EPC_____ = 14,
+    CP0_PRID____ = 15,
+    CP0_CONFIG__ = 16,
+    CP0_CONFIG1_ = 48,
 
     SR_IE_SH = 0,
     SR_EXL_SH = 1,
+    SR_ERLEXL_SH = 1,
+    SR_KSU_SH = 3,
+    SR_BEV_SH = 22,
     SR_IE_MASK = 0x1,
     SR_EXL_MASK = 0x1,
+    SR_ERLEXL_MASK = 0x3,
+    SR_KSU_MASK = 0x3,
+    SR_BEV_MASK = 0x1,
 
     CAUSE_EXC_SH = 2,
-    CAUSE_IP7_SH = 15,
+    CAUSE_IP_SH = 8,
+    CAUSE_IV_SH = 23,
+    CAUSE_CE_SH = 28,
     CAUSE_BD_SH = 31,
     CAUSE_EXC_MASK = 0x1f,
-    CAUSE_IP7_MASK = 0x1,
+    CAUSE_IP_MASK = 0xff,
+    CAUSE_IV_MASK = 0x1,
+    CAUSE_CE_MASK = 0x3,
     CAUSE_BD_MASK = 0x1,
+
+    TLB_VPAGE_SH = 10,
+    TLB_VPAGE_LOWER = 0x03ff,
+    TLB_VPAGE_MASK = 0x7ffff,
+    TLB_PPAGE_SH = 10,
+    TLB_PFN_SH = 6,
+    TLB_CACHE_SH = 3,
+    TLB_DIRTY_SH = 2,
+    TLB_VALID_SH = 1,
+    TLB_CACHE_MASK = 0x7,
+    TLB_DIRTY_MASK = 0x1,
+    TLB_VALID_MASK = 0x1,
+    TLB_GLOBAL_MASK = 0x1,
+    TLB_ASID_MASK = 0xff,
+    PAGESHIFT_MAX = 24,
+    CONT_BADV_SH = 4,
+    CONT_BADV_MASK = TLB_VPAGE_MASK,
 };
 
 /**********************************************************************/

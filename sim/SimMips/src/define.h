@@ -156,6 +156,9 @@ class MipsInst {
     uint032_t npc, vaddr;
     uint064_t rslt64, paddr;
     int cond;
+
+    uint032_t rc0;
+    int tlbop;
     
     virtual ~MipsInst() {};
     virtual void clear();
